@@ -1,6 +1,7 @@
 package main
 
 import (
+	"live-scheduler/domain/model"
 	"live-scheduler/presentation"
 	"net/http"
 	"time"
@@ -18,7 +19,7 @@ func main() {
 			Date:           time.Now(),
 			PerformanceFee: 5500,
 			EquipmentCost:  2000,
-			Band:           []presentation.BandResponsePart{{"hoge", 1, []presentation.MemberResponsePart{{"hoge", "Gt."}}}},
+			Band:           []presentation.BandResponsePart{{"hoge", 1, []presentation.MemberResponsePart{{"hoge", model.Ba}}}},
 		}
 		return c.JSON(http.StatusOK, response)
 	})
