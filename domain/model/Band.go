@@ -4,6 +4,10 @@ import "time"
 
 // Live ライブの構造体
 type Live struct {
+	// ライブID
+	id int
+	// ライブ名
+	name string
 	// 場所
 	location string
 	// 日付
@@ -20,10 +24,10 @@ type Live struct {
 type Band struct {
 	// バンド名
 	name string
+	// ライブ ID
+	liveId int
 	// 出演順
 	order int
-	// 出演日
-	liveDate time.Time
 	// メンバー
 	member []Member
 }
