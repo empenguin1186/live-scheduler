@@ -6,29 +6,29 @@ import (
 
 type LiveResponse struct {
 	// ライブ名
-	Name string
+	Name string `json:"name"`
 	// 場所
-	Location string
+	Location string `json:"location"`
 	// 日付
-	Date time.Time
+	Date time.Time `json:"date"`
 	// 1人あたりの出演料
-	PerformanceFee int
+	PerformanceFee int `json:"performance_fee"`
 	// 1バンドあたりの機材費
-	EquipmentCost int
+	EquipmentCost int `json:"equipment_cost"`
 	// 出演するバンド
-	Band []BandResponsePart
+	Band []BandResponsePart `json:"band"`
 }
 
 type BandResponsePart struct {
 	// バンド名
-	Name string
+	Name string `json:"name"`
 	// 出演順
-	Order int
+	Order int `json:"order"`
 	// メンバー
-	Member []MemberResponsePart
+	Member []MemberResponsePart `json:"member"`
 }
 
 type MemberResponsePart struct {
-	Name string
-	Part string
+	Name string `json:"name"`
+	Part string `json:"part"`
 }
