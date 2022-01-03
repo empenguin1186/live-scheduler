@@ -13,12 +13,12 @@
 - live_id: ライブID(主キー) 外部キーとして Live テーブルの id カラムを参照する
 - order: 出演順(主キー)
 
-## BandMemberRelation テーブル
+## BandMember テーブル
 - live_id: ライブID(主キー) Live テーブルの id カラムを外部キー
 - order: 出演順(主キー) Band テーブルの order カラムを外部キー
 - member_name: メンバーの名前(主キー) Member テーブルの name カラムを外部キー
 - member_part: 担当パート(主キー) Member テーブルの part カラムを外部キー
 
-## Member テーブル
+## Player テーブル
 - name: メンバーの名前(主キー)
-- part: 担当パート(主キー)
+- part: 担当パート(主キー) enum 型
