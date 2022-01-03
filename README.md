@@ -40,7 +40,7 @@ INSERT INTO Band VALUES('name2', 1, 2);
 
 ## Player
 INSERT INTO Player VALUES ('drummer', 'Dr.');
-INSERT INTO Player VALUES ('guiterist', 'Gt.');
+INSERT INTO Player VALUES ('guitarist', 'Gt.');
 
 ## BandMember
 INSERT INTO BandMember VALUES(1, 1, 'drummer', 'Dr.');
