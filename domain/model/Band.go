@@ -5,31 +5,31 @@ import "time"
 // Live ライブの構造体
 type Live struct {
 	// ライブID
-	id int
+	Id int
 	// ライブ名
-	name string
+	Name string
 	// 場所
-	location string
+	Location string
 	// 日付
-	date time.Time
+	Date time.Time
 	// 1人あたりの出演料
-	performanceFee int
+	PerformanceFee int
 	// 1バンドあたりの機材費
-	equipmentCost int
+	EquipmentCost int
 	// 出演するバンド
-	band []Band
+	Band []Band
 }
 
 // Band バンドの構造体
 type Band struct {
 	// バンド名
-	name string
+	Name string
 	// ライブ ID
-	liveId int
+	LiveId int
 	// 出演順
-	order int
+	Order int
 	// メンバー
-	member []Member
+	Member []Member
 }
 
 // Part 楽器パート構造体
@@ -46,6 +46,6 @@ const (
 
 // Member Band メンバー構造体
 type Member struct {
-	name string
-	part Part
+	Name string
+	Part Part
 }
