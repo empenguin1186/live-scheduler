@@ -67,8 +67,7 @@ func main() {
 			Date:           live.Date,
 			PerformanceFee: live.PerformanceFee,
 			EquipmentCost:  live.EquipmentCost,
-			//Band:           []presentation.BandResponsePart{{"hoge", 1, []presentation.MemberResponsePart{{"hoge", model.Ba}}}},
-			Band: bandResponsePart,
+			Band:           bandResponsePart,
 		}
 		return c.JSON(http.StatusOK, response)
 	})
