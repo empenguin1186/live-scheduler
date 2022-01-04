@@ -30,12 +30,13 @@ func main() {
 		liveRepository := infra.NewLiveRepositoryImpl(dbmap)
 		bandRepository := infra.NewBandRepositoryImpl(dbmap)
 		bandMemberRepository := infra.NewBandMemberRepositoryImpl(dbmap)
+		//playerRepository := infra.NewPlayerRepositoryImpl(dbmap)
 		liveService := domain.NewLiveService(liveRepository, bandRepository, bandMemberRepository)
 
 		var date time.Time
 		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
 		checkErr(err, "Invalid Query Parameter")
-		live := liveService.GetDate(date)
+		liveModel := liveService.GetByDate(date)
 
 		//response := presentation.LiveResponse{
 		//	Name:           live.Name,
@@ -46,7 +47,7 @@ func main() {
 		//	Band:           live.Band,
 		//}
 
-		return c.JSON(http.StatusOK, live)
+		return c.JSON(http.StatusOK, liveModel)
 	})
 	e.Logger.Fatal(e.Start(":1323"))
 }

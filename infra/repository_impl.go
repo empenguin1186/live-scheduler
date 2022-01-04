@@ -92,6 +92,7 @@ func (i BandRepositoryImpl) Create(band domain.Band) error {
 	record := Band{
 		Name:   band.Name,
 		LiveId: band.LiveId,
+		Turn:   band.Turn,
 	}
 	err := i.dbmap.Insert(&record)
 	checkErr(err, "INSERT INTO Band QUERY failed.")
