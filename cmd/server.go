@@ -17,7 +17,6 @@ import (
 const LAYOUT = "2006-01-02"
 
 func main() {
-	// 日付を指定してそれに基づくライブの情報を取得する
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		user := os.Getenv("USER")
@@ -32,9 +31,11 @@ func main() {
 		bandRepository := infra.NewBandRepositoryImpl(dbmap)
 		bandMemberRepository := infra.NewBandMemberRepositoryImpl(dbmap)
 		liveService := domain.NewLiveService(liveRepository, bandRepository, bandMemberRepository)
-		live := liveService.GetDate(time.Date(2022, 1, 3, 0, 0, 0, 0, time.Local))
 
-		//live := repository.FindByDate(time.Date(2022, 1, 3, 0, 0, 0, 0, time.Local))
+		var date time.Time
+		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
+		checkErr(err, "Invalid Query Parameter")
+		live := liveService.GetDate(date)
 
 		//response := presentation.LiveResponse{
 		//	Name:           live.Name,
