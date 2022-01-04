@@ -75,3 +75,11 @@ type BandModel struct {
 	// メンバー
 	Player []Player
 }
+
+// BandMember バンドメンバーの構造体
+type BandMember struct {
+	LiveId     int
+	Turn       int
+	MemberName string
+	MemberPart Part
+}

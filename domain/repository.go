@@ -7,8 +7,8 @@ import (
 type LiveRepository interface {
 	FindByDate(time time.Time) Live
 	Create(live Live) error
-	UpdateDateById(id int, time time.Time) error
-	DeleteById(id int)
+	Update(live Live) error
+	Delete(live Live) error
 }
 
 type BandRepository interface {
@@ -20,13 +20,13 @@ type BandRepository interface {
 
 type BandMemberRepository interface {
 	FindByLiveIdAndTurn(id int, turn int) []Player
-	Create(id int, turn int, name string, part Part) error
-	DeleteOne(id int, turn int, name string, part Part) error
+	Create(bandMember BandMember) error
+	Delete(bandMember BandMember) error
 	UpdateTurn(id int, prevTurn int, afterTurn int) error
 }
 
 type PlayerRepository interface {
-	Create(name string, part Part) error
-	Delete(name string, part Part) error
+	Create(player Player) error
+	Delete(player Player) error
 	FindByPart(part Part) []Player
 }
