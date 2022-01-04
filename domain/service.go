@@ -14,13 +14,13 @@ func NewLiveService(liveRepository LiveRepository, bandRepository BandRepository
 	return LiveService{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
 }
 
-func (s LiveService) GetDate(date time.Time) LiveModel {
+func (s LiveService) GetByDate(date time.Time) LiveModel {
 	live := s.liveRepository.FindByDate(date)
 	bands := s.bandRepository.FindByLiveId(live.Id)
 	var bandModels []BandModel
 	for _, band := range bands {
-		members := s.bandMemberRepository.FindByLiveIdAndTurn(band.LiveId, band.Turn)
-		bandModels = append(bandModels, BandModel{Name: band.Name, LiveId: band.LiveId, Turn: band.Turn, Member: members})
+		players := s.bandMemberRepository.FindByLiveIdAndTurn(band.LiveId, band.Turn)
+		bandModels = append(bandModels, BandModel{Name: band.Name, LiveId: band.LiveId, Turn: band.Turn, Player: players})
 	}
 	return LiveModel{
 		Id:             live.Id,

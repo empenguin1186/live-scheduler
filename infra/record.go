@@ -14,6 +14,14 @@ type LiveRecord struct {
 	EquipmentCost  int       `db:"equipment_cost"`
 }
 
+type LiveRecordForInsert struct {
+	Name           string    `db:"name"`
+	Location       string    `db:"location"`
+	Date           time.Time `db:"date"`
+	PerformanceFee int       `db:"performance_fee"`
+	EquipmentCost  int       `db:"equipment_cost"`
+}
+
 func (r LiveRecord) ToModel() domain.Live {
 	return domain.Live{Id: r.Id, Name: r.Name, Location: r.Location, Date: r.Date, PerformanceFee: r.PerformanceFee, EquipmentCost: r.EquipmentCost}
 }
@@ -35,6 +43,6 @@ type BandMemberRecord struct {
 	MemberPart domain.Part `db:"member_part, primarykey"`
 }
 
-func (r BandMemberRecord) ToModel() domain.Member {
-	return domain.Member{Name: r.MemberName, Part: r.MemberPart}
+func (r BandMemberRecord) ToModel() domain.Player {
+	return domain.Player{Name: r.MemberName, Part: r.MemberPart}
 }

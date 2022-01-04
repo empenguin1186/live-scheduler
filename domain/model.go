@@ -40,8 +40,8 @@ const (
 	Dr   = Part("Dr.")
 )
 
-// Member Band メンバー構造体
-type Member struct {
+// Player Band メンバー構造体
+type Player struct {
 	Name string
 	Part Part
 }
@@ -73,5 +73,5 @@ type BandModel struct {
 	// 出演順
 	Turn int
 	// メンバー
-	Member []Member
+	Player []Player
 }
