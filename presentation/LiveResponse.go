@@ -1,7 +1,7 @@
 package presentation
 
 import (
-	"live-scheduler/domain/model"
+	"live-scheduler/domain"
 	"time"
 )
 
@@ -30,6 +30,6 @@ type BandResponsePart struct {
 }
 
 type MemberResponsePart struct {
-	Name string     `json:"name"`
-	Part model.Part `json:"part"`
+	Name string      `json:"name"`
+	Part domain.Part `json:"part"`
 }
