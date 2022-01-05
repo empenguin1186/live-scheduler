@@ -37,16 +37,6 @@ func main() {
 		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
 		checkErr(err, "Invalid Query Parameter")
 		liveModel := liveService.GetByDate(&date)
-
-		//response := presentation.LiveResponse{
-		//	Name:           live.Name,
-		//	Location:       live.Location,
-		//	Date:           live.Date,
-		//	PerformanceFee: live.PerformanceFee,
-		//	EquipmentCost:  live.EquipmentCost,
-		//	Band:           live.Band,
-		//}
-
 		return c.JSON(http.StatusOK, liveModel)
 	})
 	e.Logger.Fatal(e.Start(":1323"))

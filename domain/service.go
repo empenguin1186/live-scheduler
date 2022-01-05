@@ -10,19 +10,19 @@ type LiveService struct {
 	bandMemberRepository BandMemberRepository
 }
 
-func NewLiveService(liveRepository LiveRepository, bandRepository BandRepository, bandMemberRepository BandMemberRepository) LiveService {
-	return LiveService{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
+func NewLiveService(liveRepository LiveRepository, bandRepository BandRepository, bandMemberRepository BandMemberRepository) *LiveService {
+	return &LiveService{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
 }
 
-func (s LiveService) GetByDate(date *time.Time) LiveModel {
+func (s *LiveService) GetByDate(date *time.Time) *LiveModel {
 	live := s.liveRepository.FindByDate(date)
 	bands := s.bandRepository.FindByLiveId(live.Id)
-	var bandModels []BandModel
+	var bandModels []*BandModel
 	for _, band := range bands {
 		players := s.bandMemberRepository.FindByLiveIdAndTurn(band.LiveId, band.Turn)
-		bandModels = append(bandModels, BandModel{Name: band.Name, LiveId: band.LiveId, Turn: band.Turn, Player: players})
+		bandModels = append(bandModels, &BandModel{Name: band.Name, LiveId: band.LiveId, Turn: band.Turn, Player: players})
 	}
-	return LiveModel{
+	return &LiveModel{
 		Id:             live.Id,
 		Name:           live.Name,
 		Location:       live.Location,

@@ -61,7 +61,7 @@ type LiveModel struct {
 	// 1バンドあたりの機材費
 	EquipmentCost int
 	// 参加するバンド
-	Band []BandModel
+	Band []*BandModel
 }
 
 // BandModel バンドの構造体
@@ -73,7 +73,7 @@ type BandModel struct {
 	// 出演順
 	Turn int
 	// メンバー
-	Player []Player
+	Player []*Player
 }
 
 // BandMember バンドメンバーの構造体
