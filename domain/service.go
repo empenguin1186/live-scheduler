@@ -14,7 +14,7 @@ func NewLiveService(liveRepository LiveRepository, bandRepository BandRepository
 	return LiveService{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
 }
 
-func (s LiveService) GetByDate(date time.Time) LiveModel {
+func (s LiveService) GetByDate(date *time.Time) LiveModel {
 	live := s.liveRepository.FindByDate(date)
 	bands := s.bandRepository.FindByLiveId(live.Id)
 	var bandModels []BandModel

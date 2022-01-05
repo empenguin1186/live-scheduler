@@ -18,7 +18,7 @@ func NewLiveRepositoryImpl(dbmap *gorp.DbMap) LiveRepositoryImpl {
 	return LiveRepositoryImpl{dbmap: dbmap}
 }
 
-func (i LiveRepositoryImpl) FindByDate(time time.Time) domain.Live {
+func (i LiveRepositoryImpl) FindByDate(time *time.Time) domain.Live {
 	var lives []Live
 	_, err := i.dbmap.Select(&lives, "SELECT * FROM Live WHERE date = ?", time.Format(LAYOUT))
 	checkErr(err, "SELECT * FROM Live QUERY failed.")
@@ -26,7 +26,7 @@ func (i LiveRepositoryImpl) FindByDate(time time.Time) domain.Live {
 	return live.ToModel()
 }
 
-func (i LiveRepositoryImpl) Create(live domain.Live) error {
+func (i LiveRepositoryImpl) Create(live *domain.Live) error {
 	record := Live{
 		Name:           live.Name,
 		Location:       live.Location,
@@ -39,7 +39,7 @@ func (i LiveRepositoryImpl) Create(live domain.Live) error {
 	return err
 }
 
-func (i LiveRepositoryImpl) Update(live domain.Live) error {
+func (i LiveRepositoryImpl) Update(live *domain.Live) error {
 	record := Live{
 		Id:             live.Id,
 		Name:           live.Name,
@@ -53,7 +53,7 @@ func (i LiveRepositoryImpl) Update(live domain.Live) error {
 	return err
 }
 
-func (i LiveRepositoryImpl) Delete(live domain.Live) error {
+func (i LiveRepositoryImpl) Delete(live *domain.Live) error {
 	record := Live{
 		Id:             live.Id,
 		Name:           live.Name,
@@ -88,7 +88,7 @@ func (i BandRepositoryImpl) FindByLiveId(id int) []domain.Band {
 	return bands
 }
 
-func (i BandRepositoryImpl) Create(band domain.Band) error {
+func (i BandRepositoryImpl) Create(band *domain.Band) error {
 	record := Band{
 		Name:   band.Name,
 		LiveId: band.LiveId,
@@ -132,7 +132,7 @@ func (i BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) []domain
 	return members
 }
 
-func (i BandMemberRepositoryImpl) Create(bandMember domain.BandMember) error {
+func (i BandMemberRepositoryImpl) Create(bandMember *domain.BandMember) error {
 	record := BandMember{
 		LiveId:     bandMember.LiveId,
 		Turn:       bandMember.Turn,
@@ -144,7 +144,7 @@ func (i BandMemberRepositoryImpl) Create(bandMember domain.BandMember) error {
 	return err
 }
 
-func (i BandMemberRepositoryImpl) Delete(bandMember domain.BandMember) error {
+func (i BandMemberRepositoryImpl) Delete(bandMember *domain.BandMember) error {
 	record := BandMember{
 		LiveId:     bandMember.LiveId,
 		Turn:       bandMember.Turn,
@@ -171,7 +171,7 @@ func NewPlayerRepositoryImpl(dbmap *gorp.DbMap) PlayerRepositoryImpl {
 	return PlayerRepositoryImpl{dbmap: dbmap}
 }
 
-func (p PlayerRepositoryImpl) Create(player domain.Player) error {
+func (p PlayerRepositoryImpl) Create(player *domain.Player) error {
 	record := Player{
 		Name: player.Name,
 		Part: string(player.Part),
@@ -181,7 +181,7 @@ func (p PlayerRepositoryImpl) Create(player domain.Player) error {
 	return err
 }
 
-func (p PlayerRepositoryImpl) Delete(player domain.Player) error {
+func (p PlayerRepositoryImpl) Delete(player *domain.Player) error {
 	record := Player{
 		Name: player.Name,
 		Part: string(player.Part),
@@ -191,9 +191,9 @@ func (p PlayerRepositoryImpl) Delete(player domain.Player) error {
 	return err
 }
 
-func (p PlayerRepositoryImpl) FindByPart(part domain.Part) []domain.Player {
+func (p PlayerRepositoryImpl) FindByPart(part *domain.Part) []domain.Player {
 	var players []Player
-	_, err := p.dbmap.Select(&players, "SELECT * FROM Player WHERE part = ?", string(part))
+	_, err := p.dbmap.Select(&players, "SELECT * FROM Player WHERE part = ?", string(*part))
 	checkErr(err, "SELECT * FROM Player QUERY failed.")
 
 	var result []domain.Player

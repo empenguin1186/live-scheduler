@@ -36,7 +36,7 @@ func main() {
 		var date time.Time
 		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
 		checkErr(err, "Invalid Query Parameter")
-		liveModel := liveService.GetByDate(date)
+		liveModel := liveService.GetByDate(&date)
 
 		//response := presentation.LiveResponse{
 		//	Name:           live.Name,
