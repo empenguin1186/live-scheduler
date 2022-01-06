@@ -52,10 +52,8 @@ func GetByDateTest(t *testing.T) {
 	players2 := []*Player{&Player{Name: "player3", Part: Gt}, &Player{Name: "player4", Part: Key}}
 	bandMemberRepository := new(BandMemberRepositoryMock)
 	bandMemberRepository.
-		On("FindByLiveIdAndTurn", 1, 1).
-		Return(players1).Once().
-		On("FindByLiveIdAndTurn", 1, 2).
-		Return(players2).Once()
+		On("FindByLiveIdAndTurn", 1, 1).Return(players1).Once().
+		On("FindByLiveIdAndTurn", 1, 2).Return(players2).Once()
 
 	expected := LiveModel{
 		Id:             live.Id,
