@@ -37,7 +37,7 @@ func (m *BandMemberRepositoryMock) FindByLiveIdAndTurn(id int, turn int) []*Play
 	return args.Get(0).([]*Player)
 }
 
-func TestSomething(t *testing.T) {
+func GetByDateTest(t *testing.T) {
 	// given
 	now := time.Now()
 	live := Live{Id: 1, Name: "name", Location: "location", Date: now, PerformanceFee: 5500, EquipmentCost: 2000}
@@ -69,7 +69,6 @@ func TestSomething(t *testing.T) {
 			&BandModel{Name: "band2", LiveId: 1, Turn: 2, Player: players2},
 		},
 	}
-
 	liveService := NewLiveService(liveRepository, bandRepository, bandMemberRepository)
 
 	// when
