@@ -1,26 +1,34 @@
 package infra
 
 import (
+	"database/sql"
 	"github.com/go-gorp/gorp"
 	"live-scheduler/domain"
 	"log"
 	"time"
 )
 
-const LAYOUT = "2006-01-02"
-
-type LiveRepositoryImpl struct {
-	dbmap *gorp.DbMap
+type Dao interface {
+	AddTableWithName(i interface{}, name string) *gorp.TableMap
+	Insert(list ...interface{}) error
+	Select(i interface{}, query string, args ...interface{}) ([]interface{}, error)
+	Update(list ...interface{}) (int64, error)
+	Delete(list ...interface{}) (int64, error)
+	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
-func NewLiveRepositoryImpl(dbmap *gorp.DbMap) *LiveRepositoryImpl {
-	dbmap.AddTableWithName(Live{}, "Live")
-	return &LiveRepositoryImpl{dbmap: dbmap}
+type LiveRepositoryImpl struct {
+	dao Dao
+}
+
+func NewLiveRepositoryImpl(dao Dao) *LiveRepositoryImpl {
+	dao.AddTableWithName(Live{}, "Live")
+	return &LiveRepositoryImpl{dao: dao}
 }
 
 func (i *LiveRepositoryImpl) FindByDate(time *time.Time) *domain.Live {
 	var lives []Live
-	_, err := i.dbmap.Select(&lives, "SELECT * FROM Live WHERE date = ?", time.Format(LAYOUT))
+	_, err := i.dao.Select(&lives, "SELECT * FROM Live WHERE date = ?", time.Format("2006-01-02"))
 	checkErr(err, "SELECT * FROM Live QUERY failed.")
 	live := lives[0]
 	return live.ToModel()
@@ -34,7 +42,7 @@ func (i *LiveRepositoryImpl) Create(live *domain.Live) error {
 		PerformanceFee: live.PerformanceFee,
 		EquipmentCost:  live.EquipmentCost,
 	}
-	err := i.dbmap.Insert(&record)
+	err := i.dao.Insert(&record)
 	checkErr(err, "INSERT INTO Live QUERY failed.")
 	return err
 }
@@ -48,7 +56,7 @@ func (i *LiveRepositoryImpl) Update(live *domain.Live) error {
 		PerformanceFee: live.PerformanceFee,
 		EquipmentCost:  live.EquipmentCost,
 	}
-	_, err := i.dbmap.Update(&record)
+	_, err := i.dao.Update(&record)
 	checkErr(err, "UPDATE Live QUERY failed.")
 	return err
 }
@@ -62,23 +70,23 @@ func (i *LiveRepositoryImpl) Delete(live *domain.Live) error {
 		PerformanceFee: live.PerformanceFee,
 		EquipmentCost:  live.EquipmentCost,
 	}
-	_, err := i.dbmap.Delete(&record)
+	_, err := i.dao.Delete(&record)
 	checkErr(err, "DELETE Live QUERY failed.")
 	return err
 }
 
 type BandRepositoryImpl struct {
-	dbmap *gorp.DbMap
+	dao Dao
 }
 
-func NewBandRepositoryImpl(dbmap *gorp.DbMap) *BandRepositoryImpl {
-	dbmap.AddTableWithName(Band{}, "Band")
-	return &BandRepositoryImpl{dbmap: dbmap}
+func NewBandRepositoryImpl(dao Dao) *BandRepositoryImpl {
+	dao.AddTableWithName(Band{}, "Band")
+	return &BandRepositoryImpl{dao: dao}
 }
 
 func (i BandRepositoryImpl) FindByLiveId(id int) []*domain.Band {
 	var bandRecords []Band
-	_, err := i.dbmap.Select(&bandRecords, "SELECT * FROM Band WHERE live_id = ?", id)
+	_, err := i.dao.Select(&bandRecords, "SELECT * FROM Band WHERE live_id = ?", id)
 	checkErr(err, "SELECT * FROM Band QUERY failed.")
 
 	var bands []*domain.Band
@@ -94,35 +102,35 @@ func (i *BandRepositoryImpl) Create(band *domain.Band) error {
 		LiveId: band.LiveId,
 		Turn:   band.Turn,
 	}
-	err := i.dbmap.Insert(&record)
+	err := i.dao.Insert(&record)
 	checkErr(err, "INSERT INTO Band QUERY failed.")
 	return err
 }
 
 func (i *BandRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn int) error {
-	_, err := i.dbmap.Exec("UPDATE Band SET turn=? WHERE live_id=? AND turn=?", afterTurn, id, prevTurn)
+	_, err := i.dao.Exec("UPDATE Band SET turn=? WHERE live_id=? AND turn=?", afterTurn, id, prevTurn)
 	checkErr(err, "UPDATE Band QUERY failed.")
 	return err
 }
 
 func (i *BandRepositoryImpl) DeleteByIdAndTurn(id int, turn int) error {
-	_, err := i.dbmap.Exec("DELETE FROM Band WHERE live_id=? AND turn=?", id, turn)
+	_, err := i.dao.Exec("DELETE FROM Band WHERE live_id=? AND turn=?", id, turn)
 	checkErr(err, "DELETE Band QUERY failed.")
 	return err
 }
 
 type BandMemberRepositoryImpl struct {
-	dbmap *gorp.DbMap
+	dao Dao
 }
 
-func NewBandMemberRepositoryImpl(dbmap *gorp.DbMap) *BandMemberRepositoryImpl {
-	dbmap.AddTableWithName(BandMember{}, "BandMember")
-	return &BandMemberRepositoryImpl{dbmap: dbmap}
+func NewBandMemberRepositoryImpl(dao Dao) *BandMemberRepositoryImpl {
+	dao.AddTableWithName(BandMember{}, "BandMember")
+	return &BandMemberRepositoryImpl{dao: dao}
 }
 
 func (i *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) []*domain.Player {
 	var memberRecords []BandMember
-	_, err := i.dbmap.Select(&memberRecords, "SELECT * FROM BandMember WHERE live_id = ? AND turn = ?", id, turn)
+	_, err := i.dao.Select(&memberRecords, "SELECT * FROM BandMember WHERE live_id = ? AND turn = ?", id, turn)
 	checkErr(err, "SELECT * FROM BandMember QUERY failed.")
 
 	var members []*domain.Player
@@ -139,7 +147,7 @@ func (i *BandMemberRepositoryImpl) Create(bandMember *domain.BandMember) error {
 		MemberName: bandMember.MemberName,
 		MemberPart: string(bandMember.MemberPart),
 	}
-	err := i.dbmap.Insert(&record)
+	err := i.dao.Insert(&record)
 	checkErr(err, "INSERT INTO BandMember QUERY failed.")
 	return err
 }
@@ -151,24 +159,24 @@ func (i *BandMemberRepositoryImpl) Delete(bandMember *domain.BandMember) error {
 		MemberName: bandMember.MemberName,
 		MemberPart: string(bandMember.MemberPart),
 	}
-	_, err := i.dbmap.Delete(&record)
+	_, err := i.dao.Delete(&record)
 	checkErr(err, "INSERT INTO BandMember QUERY failed.")
 	return err
 }
 
 func (i *BandMemberRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn int) error {
-	_, err := i.dbmap.Exec("UPDATE BandMember SET turn=? WHERE live_id=? AND turn=?", afterTurn, id, prevTurn)
+	_, err := i.dao.Exec("UPDATE BandMember SET turn=? WHERE live_id=? AND turn=?", afterTurn, id, prevTurn)
 	checkErr(err, "UPDATE BandMember QUERY failed.")
 	return err
 }
 
 type PlayerRepositoryImpl struct {
-	dbmap *gorp.DbMap
+	dao Dao
 }
 
-func NewPlayerRepositoryImpl(dbmap *gorp.DbMap) *PlayerRepositoryImpl {
-	dbmap.AddTableWithName(Player{}, "Player")
-	return &PlayerRepositoryImpl{dbmap: dbmap}
+func NewPlayerRepositoryImpl(dao Dao) *PlayerRepositoryImpl {
+	dao.AddTableWithName(Player{}, "Player")
+	return &PlayerRepositoryImpl{dao: dao}
 }
 
 func (p *PlayerRepositoryImpl) Create(player *domain.Player) error {
@@ -176,7 +184,7 @@ func (p *PlayerRepositoryImpl) Create(player *domain.Player) error {
 		Name: player.Name,
 		Part: string(player.Part),
 	}
-	err := p.dbmap.Insert(&record)
+	err := p.dao.Insert(&record)
 	checkErr(err, "INSERT INTO Player QUERY failed.")
 	return err
 }
@@ -186,14 +194,14 @@ func (p *PlayerRepositoryImpl) Delete(player *domain.Player) error {
 		Name: player.Name,
 		Part: string(player.Part),
 	}
-	_, err := p.dbmap.Delete(&record)
+	_, err := p.dao.Delete(&record)
 	checkErr(err, "INSERT INTO Player QUERY failed.")
 	return err
 }
 
 func (p *PlayerRepositoryImpl) FindByPart(part *domain.Part) []*domain.Player {
 	var players []Player
-	_, err := p.dbmap.Select(&players, "SELECT * FROM Player WHERE part = ?", string(*part))
+	_, err := p.dao.Select(&players, "SELECT * FROM Player WHERE part = ?", string(*part))
 	checkErr(err, "SELECT * FROM Player QUERY failed.")
 
 	var result []*domain.Player
