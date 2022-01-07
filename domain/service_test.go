@@ -37,7 +37,7 @@ func (m *BandMemberRepositoryMock) FindByLiveIdAndTurn(id int, turn int) []*Play
 	return args.Get(0).([]*Player)
 }
 
-func GetByDateTest(t *testing.T) {
+func TestGetByDate(t *testing.T) {
 	// given
 	now := time.Now()
 	live := Live{Id: 1, Name: "name", Location: "location", Date: now, PerformanceFee: 5500, EquipmentCost: 2000}
