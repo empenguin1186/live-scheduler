@@ -162,48 +162,38 @@ func (b *BandMemberRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn in
 }
 
 type PlayerRepositoryImpl struct {
-	dao Dao
+	db *sql.DB
 }
 
-func NewPlayerRepositoryImpl(dao Dao) *PlayerRepositoryImpl {
-	dao.AddTableWithName(Player{}, "Player")
-	return &PlayerRepositoryImpl{dao: dao}
+func NewPlayerRepositoryImpl(db *sql.DB) *PlayerRepositoryImpl {
+	return &PlayerRepositoryImpl{db: db}
 }
 
 func (p *PlayerRepositoryImpl) Create(player *domain.Player) error {
-	record := Player{
-		Name: player.Name,
-		Part: string(player.Part),
-	}
-	err := p.dao.Insert(&record)
-	checkErr(err, "INSERT INTO Player QUERY failed.")
+	_, err := p.db.Exec(`INSERT INTO Player(name, part) VALUES ( ?, ? )`, player.Name, string(player.Part))
 	return err
 }
 
 func (p *PlayerRepositoryImpl) Delete(player *domain.Player) error {
-	record := Player{
-		Name: player.Name,
-		Part: string(player.Part),
-	}
-	_, err := p.dao.Delete(&record)
-	checkErr(err, "INSERT INTO Player QUERY failed.")
+	_, err := p.db.Exec(`DELETE FROM Player WHERE name = ? AND part = ?`, player.Name, string(player.Part))
 	return err
 }
 
 func (p *PlayerRepositoryImpl) FindByPart(part *domain.Part) []*domain.Player {
-	var players []Player
-	_, err := p.dao.Select(&players, "SELECT * FROM Player WHERE part = ?", string(*part))
-	checkErr(err, "SELECT * FROM Player QUERY failed.")
-
-	var result []*domain.Player
-	for _, player := range players {
-		result = append(result, player.ToModel())
-	}
-	return result
-}
-
-func checkErr(err error, msg string) {
+	rows, err := p.db.Query(`SELECT * FROM Player WHERE Part = ?`, string(*part))
+	// TODO エラーハンドリング
 	if err != nil {
-		log.Fatalln(msg, err)
+		log.Fatal(err)
 	}
+	var players []*domain.Player
+	for rows.Next() {
+		var name string
+		var part string
+
+		// TODO エラーハンドリング
+		err = rows.Scan(&name, &part)
+		player := domain.Player{Name: name, Part: domain.Part(part)}
+		players = append(players, &player)
+	}
+	return players
 }
