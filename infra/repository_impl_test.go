@@ -2,51 +2,14 @@ package infra
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/go-gorp/gorp"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"live-scheduler/domain"
 	"regexp"
 	"testing"
 	"time"
 )
 
-type DaoMock struct {
-	mock.Mock
-	Dao
-}
-
 var now = time.Now()
-
-func (m *DaoMock) Select(i interface{}, query string, args ...interface{}) ([]interface{}, error) {
-	arguments := m.Called(i, query, args)
-	return arguments.Get(0).([]interface{}), arguments.Error(1)
-}
-
-func (m *DaoMock) AddTableWithName(i interface{}, name string) *gorp.TableMap {
-	arguments := m.Called(i, name)
-	return arguments.Get(0).(*gorp.TableMap)
-}
-
-func TestFindByDate(t *testing.T) {
-	// given
-	var lives []Live
-	dao := new(DaoMock)
-	dao.On("Select", &lives, "SELECT * FROM Live WHERE date = ?", []interface{}{now.Format("2006-01-02")}).
-		Return(make([]interface{}, 1), nil).
-		Once()
-	dao.On("AddTableWithName", Live{}, "Live").
-		Return(&gorp.TableMap{}).
-		Once()
-	liveRepository := NewLiveRepositoryImpl(dao)
-
-	// when
-	actual := liveRepository.FindByDate(&now)
-
-	// then
-	assertion := assert.New(t)
-	assertion.Equal(domain.Live{}, actual)
-}
 
 func TestSample(t *testing.T) {
 	// given
@@ -67,11 +30,12 @@ func TestSample(t *testing.T) {
 		WithArgs(now.Format("2006-01-02")).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "location", "date", "performance_fee", "equipment_cost"}).
 			AddRow(expected.Id, expected.Name, expected.Location, expected.Date, expected.PerformanceFee, expected.EquipmentCost))
-	repository := NewLiveRepositoryAlpha(db)
+	repository := NewLiveRepositoryImpl(db)
 
 	// when
-	actual := repository.FindByDate(&now)
+	actual, err := repository.FindByDate(&now)
 
 	// then
 	assert.Equal(t, &expected, actual)
+	assert.Nil(t, err)
 }

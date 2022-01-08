@@ -2,22 +2,12 @@ package infra
 
 import (
 	"database/sql"
-	"github.com/go-gorp/gorp"
+	"fmt"
 	"live-scheduler/domain"
-	"log"
 	"time"
 )
 
 const LAYOUT = "2006-01-02"
-
-type Dao interface {
-	AddTableWithName(i interface{}, name string) *gorp.TableMap
-	Insert(list ...interface{}) error
-	Select(i interface{}, query string, args ...interface{}) ([]interface{}, error)
-	Update(list ...interface{}) (int64, error)
-	Delete(list ...interface{}) (int64, error)
-	Exec(query string, args ...interface{}) (sql.Result, error)
-}
 
 type LiveRepositoryImpl struct {
 	db *sql.DB
@@ -27,10 +17,10 @@ func NewLiveRepositoryImpl(db *sql.DB) *LiveRepositoryImpl {
 	return &LiveRepositoryImpl{db: db}
 }
 
-func (a *LiveRepositoryImpl) FindByDate(date *time.Time) *domain.Live {
+func (a *LiveRepositoryImpl) FindByDate(date *time.Time) (*domain.Live, error) {
 	rows, err := a.db.Query(`SELECT * FROM Live WHERE date = ?`, date.Format(LAYOUT))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	var lives []Live
 	for rows.Next() {
@@ -44,8 +34,11 @@ func (a *LiveRepositoryImpl) FindByDate(date *time.Time) *domain.Live {
 		err = rows.Scan(&id, &name, &location, &date, &performanceFee, &equipmentCost)
 		lives = append(lives, Live{Id: id, Name: name, Location: location, Date: date, PerformanceFee: performanceFee, EquipmentCost: equipmentCost})
 	}
+	if len(lives) == 0 {
+		return nil, fmt.Errorf("live not found")
+	}
 	live := lives[0]
-	return live.ToModel()
+	return live.ToModel(), nil
 }
 
 func (a *LiveRepositoryImpl) Create(live *domain.Live) error {
@@ -75,10 +68,10 @@ func NewBandRepositoryImpl(db *sql.DB) *BandRepositoryImpl {
 	return &BandRepositoryImpl{db: db}
 }
 
-func (b *BandRepositoryImpl) FindByLiveId(id int) []*domain.Band {
+func (b *BandRepositoryImpl) FindByLiveId(id int) ([]*domain.Band, error) {
 	rows, err := b.db.Query(`SELECT * FROM Band WHERE live_id = ?`, id)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	var bands []*domain.Band
 	for rows.Next() {
@@ -86,12 +79,14 @@ func (b *BandRepositoryImpl) FindByLiveId(id int) []*domain.Band {
 		var liveId int
 		var turn int
 
-		// TODO エラーハンドリング
 		err = rows.Scan(&name, &liveId, &turn)
+		if err != nil {
+			return nil, err
+		}
 		band := Band{Name: name, LiveId: liveId, Turn: turn}
 		bands = append(bands, band.ToModel())
 	}
-	return bands
+	return bands, nil
 }
 
 func (b *BandRepositoryImpl) Create(band *domain.Band) error {
@@ -121,11 +116,10 @@ func NewBandMemberRepositoryImpl(db *sql.DB) *BandMemberRepositoryImpl {
 	return &BandMemberRepositoryImpl{db: db}
 }
 
-func (b *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) []*domain.Player {
+func (b *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) ([]*domain.Player, error) {
 	rows, err := b.db.Query(`SELECT * FROM BandMember WHERE live_id = ? AND turn = ?`, id, turn)
-	// TODO エラーハンドリング
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	var players []*domain.Player
 	for rows.Next() {
@@ -134,12 +128,14 @@ func (b *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) []*doma
 		var name string
 		var part string
 
-		// TODO エラーハンドリング
 		err = rows.Scan(&liveId, &turn, &name, &part)
+		if err != nil {
+			return nil, err
+		}
 		player := domain.Player{Name: name, Part: domain.Part(part)}
 		players = append(players, &player)
 	}
-	return players
+	return players, nil
 }
 
 func (b *BandMemberRepositoryImpl) Create(bandMember *domain.BandMember) error {
@@ -179,21 +175,22 @@ func (p *PlayerRepositoryImpl) Delete(player *domain.Player) error {
 	return err
 }
 
-func (p *PlayerRepositoryImpl) FindByPart(part *domain.Part) []*domain.Player {
+func (p *PlayerRepositoryImpl) FindByPart(part *domain.Part) ([]*domain.Player, error) {
 	rows, err := p.db.Query(`SELECT * FROM Player WHERE Part = ?`, string(*part))
-	// TODO エラーハンドリング
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	var players []*domain.Player
 	for rows.Next() {
 		var name string
 		var part string
 
-		// TODO エラーハンドリング
 		err = rows.Scan(&name, &part)
+		if err != nil {
+			return nil, err
+		}
 		player := domain.Player{Name: name, Part: domain.Part(part)}
 		players = append(players, &player)
 	}
-	return players
+	return players, err
 }
