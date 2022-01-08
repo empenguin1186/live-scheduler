@@ -12,9 +12,9 @@ type LiveRepositoryMock struct {
 	LiveRepository
 }
 
-func (m *LiveRepositoryMock) FindByDate(time *time.Time) *Live {
+func (m *LiveRepositoryMock) FindByDate(time *time.Time) (*Live, error) {
 	args := m.Called(time)
-	return args.Get(0).(*Live)
+	return args.Get(0).(*Live), args.Error(1)
 }
 
 type BandRepositoryMock struct {
@@ -22,9 +22,9 @@ type BandRepositoryMock struct {
 	BandRepository
 }
 
-func (m *BandRepositoryMock) FindByLiveId(id int) []*Band {
+func (m *BandRepositoryMock) FindByLiveId(id int) ([]*Band, error) {
 	args := m.Called(id)
-	return args.Get(0).([]*Band)
+	return args.Get(0).([]*Band), args.Error(1)
 }
 
 type BandMemberRepositoryMock struct {
@@ -32,9 +32,9 @@ type BandMemberRepositoryMock struct {
 	BandMemberRepository
 }
 
-func (m *BandMemberRepositoryMock) FindByLiveIdAndTurn(id int, turn int) []*Player {
+func (m *BandMemberRepositoryMock) FindByLiveIdAndTurn(id int, turn int) ([]*Player, error) {
 	args := m.Called(id, turn)
-	return args.Get(0).([]*Player)
+	return args.Get(0).([]*Player), args.Error(1)
 }
 
 func TestGetByDate(t *testing.T) {
@@ -42,18 +42,18 @@ func TestGetByDate(t *testing.T) {
 	now := time.Now()
 	live := Live{Id: 1, Name: "name", Location: "location", Date: now, PerformanceFee: 5500, EquipmentCost: 2000}
 	liveRepository := new(LiveRepositoryMock)
-	liveRepository.On("FindByDate", &now).Return(&live).Once()
+	liveRepository.On("FindByDate", &now).Return(&live, nil).Once()
 
 	bands := []*Band{&Band{Name: "band1", LiveId: 1, Turn: 1}, &Band{Name: "band2", LiveId: 1, Turn: 2}}
 	bandRepository := new(BandRepositoryMock)
-	bandRepository.On("FindByLiveId", 1).Return(bands).Once()
+	bandRepository.On("FindByLiveId", 1).Return(bands, nil).Once()
 
 	players1 := []*Player{&Player{Name: "player1", Part: Ba}, &Player{Name: "player2", Part: Dr}}
 	players2 := []*Player{&Player{Name: "player3", Part: Gt}, &Player{Name: "player4", Part: Key}}
 	bandMemberRepository := new(BandMemberRepositoryMock)
 	bandMemberRepository.
-		On("FindByLiveIdAndTurn", 1, 1).Return(players1).Once().
-		On("FindByLiveIdAndTurn", 1, 2).Return(players2).Once()
+		On("FindByLiveIdAndTurn", 1, 1).Return(players1, nil).Once().
+		On("FindByLiveIdAndTurn", 1, 2).Return(players2, nil).Once()
 
 	expected := LiveModel{
 		Id:             live.Id,
