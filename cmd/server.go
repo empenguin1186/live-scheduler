@@ -30,7 +30,7 @@ func main() {
 
 		liveRepository := infra.NewLiveRepositoryImpl(db)
 		bandRepository := infra.NewBandRepositoryImpl(db)
-		bandMemberRepository := infra.NewBandMemberRepositoryImpl(dbmap)
+		bandMemberRepository := infra.NewBandMemberRepositoryImpl(db)
 		//playerRepository := infra.NewPlayerRepositoryImpl(dbmap)
 		liveService := domain.NewLiveService(liveRepository, bandRepository, bandMemberRepository)
 

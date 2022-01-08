@@ -114,53 +114,50 @@ func (b *BandRepositoryImpl) DeleteByIdAndTurn(id int, turn int) error {
 }
 
 type BandMemberRepositoryImpl struct {
-	dao Dao
+	db *sql.DB
 }
 
-func NewBandMemberRepositoryImpl(dao Dao) *BandMemberRepositoryImpl {
-	dao.AddTableWithName(BandMember{}, "BandMember")
-	return &BandMemberRepositoryImpl{dao: dao}
+func NewBandMemberRepositoryImpl(db *sql.DB) *BandMemberRepositoryImpl {
+	return &BandMemberRepositoryImpl{db: db}
 }
 
-func (i *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) []*domain.Player {
-	var memberRecords []BandMember
-	_, err := i.dao.Select(&memberRecords, "SELECT * FROM BandMember WHERE live_id = ? AND turn = ?", id, turn)
-	checkErr(err, "SELECT * FROM BandMember QUERY failed.")
-
-	var members []*domain.Player
-	for _, memberRecord := range memberRecords {
-		members = append(members, memberRecord.ToModel())
+func (b *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) []*domain.Player {
+	rows, err := b.db.Query(`SELECT * FROM BandMember WHERE live_id = ? AND turn = ?`, id, turn)
+	// TODO エラーハンドリング
+	if err != nil {
+		log.Fatal(err)
 	}
-	return members
+	var players []*domain.Player
+	for rows.Next() {
+		var liveId int
+		var turn int
+		var name string
+		var part string
+
+		// TODO エラーハンドリング
+		err = rows.Scan(&liveId, &turn, &name, &part)
+		player := domain.Player{Name: name, Part: domain.Part(part)}
+		players = append(players, &player)
+	}
+	return players
 }
 
-func (i *BandMemberRepositoryImpl) Create(bandMember *domain.BandMember) error {
-	record := BandMember{
-		LiveId:     bandMember.LiveId,
-		Turn:       bandMember.Turn,
-		MemberName: bandMember.MemberName,
-		MemberPart: string(bandMember.MemberPart),
-	}
-	err := i.dao.Insert(&record)
-	checkErr(err, "INSERT INTO BandMember QUERY failed.")
+func (b *BandMemberRepositoryImpl) Create(bandMember *domain.BandMember) error {
+	_, err := b.db.Exec(
+		`INSERT INTO BandMember(live_id, turn, member_name, member_name) VALUES ( ?, ?, ?, ? )`,
+		bandMember.LiveId, bandMember.Turn, bandMember.MemberName, string(bandMember.MemberPart))
 	return err
 }
 
-func (i *BandMemberRepositoryImpl) Delete(bandMember *domain.BandMember) error {
-	record := BandMember{
-		LiveId:     bandMember.LiveId,
-		Turn:       bandMember.Turn,
-		MemberName: bandMember.MemberName,
-		MemberPart: string(bandMember.MemberPart),
-	}
-	_, err := i.dao.Delete(&record)
-	checkErr(err, "INSERT INTO BandMember QUERY failed.")
+func (b *BandMemberRepositoryImpl) Delete(bandMember *domain.BandMember) error {
+	_, err := b.db.Exec(
+		`DELETE FROM BandMember WHERE live_id = ? AND turn = ? AND member_name = ? AND member_name = ?`,
+		bandMember.LiveId, bandMember.Turn, bandMember.MemberName, string(bandMember.MemberPart))
 	return err
 }
 
-func (i *BandMemberRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn int) error {
-	_, err := i.dao.Exec("UPDATE BandMember SET turn=? WHERE live_id=? AND turn=?", afterTurn, id, prevTurn)
-	checkErr(err, "UPDATE BandMember QUERY failed.")
+func (b *BandMemberRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn int) error {
+	_, err := b.db.Exec(`UPDATE BandMember SET turn = ? WHERE live_id = ? AND turn = ?`, afterTurn, id, prevTurn)
 	return err
 }
 
