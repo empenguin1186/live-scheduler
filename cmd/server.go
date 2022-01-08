@@ -23,12 +23,13 @@ func main() {
 		pass := os.Getenv("PASS")
 		dataSourceName := fmt.Sprintf("%s:%s@tcp(localhost:3306)/sample?parseTime=true", user, pass)
 		db, err := sql.Open("mysql", dataSourceName)
+		defer db.Close()
 		dbmap := &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8"}}
 		defer dbmap.Db.Close()
 		checkErr(err, "db connection initialization failed.")
 
-		liveRepository := infra.NewLiveRepositoryImpl(dbmap)
-		bandRepository := infra.NewBandRepositoryImpl(dbmap)
+		liveRepository := infra.NewLiveRepositoryImpl(db)
+		bandRepository := infra.NewBandRepositoryImpl(db)
 		bandMemberRepository := infra.NewBandMemberRepositoryImpl(dbmap)
 		//playerRepository := infra.NewPlayerRepositoryImpl(dbmap)
 		liveService := domain.NewLiveService(liveRepository, bandRepository, bandMemberRepository)
