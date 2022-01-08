@@ -19,15 +19,15 @@ type Dao interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
-type LiveRepositoryAlpha struct {
+type LiveRepositoryImpl struct {
 	db *sql.DB
 }
 
-func NewLiveRepositoryAlpha(db *sql.DB) *LiveRepositoryAlpha {
-	return &LiveRepositoryAlpha{db: db}
+func NewLiveRepositoryImpl(db *sql.DB) *LiveRepositoryImpl {
+	return &LiveRepositoryImpl{db: db}
 }
 
-func (a *LiveRepositoryAlpha) FindByDate(date *time.Time) *domain.Live {
+func (a *LiveRepositoryImpl) FindByDate(date *time.Time) *domain.Live {
 	rows, err := a.db.Query(`SELECT * FROM Live WHERE date = ?`, date.Format(LAYOUT))
 	if err != nil {
 		log.Fatal(err)
@@ -48,80 +48,22 @@ func (a *LiveRepositoryAlpha) FindByDate(date *time.Time) *domain.Live {
 	return live.ToModel()
 }
 
-func (a *LiveRepositoryAlpha) Create(live *domain.Live) error {
+func (a *LiveRepositoryImpl) Create(live *domain.Live) error {
 	_, err := a.db.Exec(
 		`INSERT INTO Live(name, location, date, performance_fee, equipment_cost) VALUES ( ?, ?, ?, ?, ? )`,
 		live.Name, live.Location, live.Date.Format(LAYOUT), live.PerformanceFee, live.EquipmentCost)
 	return err
 }
 
-func (a *LiveRepositoryAlpha) Update(live *domain.Live) error {
+func (a *LiveRepositoryImpl) Update(live *domain.Live) error {
 	_, err := a.db.Exec(
 		`UPDATE Live SET name = ?, location = ?, date = ?, performance_fee = ?, equipment_cost = ?`,
 		live.Name, live.Location, live.Date.Format(LAYOUT), live.PerformanceFee, live.EquipmentCost)
 	return err
 }
 
-func (a *LiveRepositoryAlpha) Delete(live *domain.Live) error {
+func (a *LiveRepositoryImpl) Delete(live *domain.Live) error {
 	_, err := a.db.Exec(`DELETE FROM Live WHERE id = ?`, live.Id)
-	return err
-}
-
-type LiveRepositoryImpl struct {
-	dao Dao
-}
-
-func NewLiveRepositoryImpl(dao Dao) *LiveRepositoryImpl {
-	dao.AddTableWithName(Live{}, "Live")
-	return &LiveRepositoryImpl{dao: dao}
-}
-
-func (i *LiveRepositoryImpl) FindByDate(time *time.Time) *domain.Live {
-	var lives []Live
-	_, err := i.dao.Select(&lives, "SELECT * FROM Live WHERE date = ?", time.Format("2006-01-02"))
-	checkErr(err, "SELECT * FROM Live QUERY failed.")
-	live := lives[0]
-	return live.ToModel()
-}
-
-func (i *LiveRepositoryImpl) Create(live *domain.Live) error {
-	record := Live{
-		Name:           live.Name,
-		Location:       live.Location,
-		Date:           live.Date,
-		PerformanceFee: live.PerformanceFee,
-		EquipmentCost:  live.EquipmentCost,
-	}
-	err := i.dao.Insert(&record)
-	checkErr(err, "INSERT INTO Live QUERY failed.")
-	return err
-}
-
-func (i *LiveRepositoryImpl) Update(live *domain.Live) error {
-	record := Live{
-		Id:             live.Id,
-		Name:           live.Name,
-		Location:       live.Location,
-		Date:           live.Date,
-		PerformanceFee: live.PerformanceFee,
-		EquipmentCost:  live.EquipmentCost,
-	}
-	_, err := i.dao.Update(&record)
-	checkErr(err, "UPDATE Live QUERY failed.")
-	return err
-}
-
-func (i *LiveRepositoryImpl) Delete(live *domain.Live) error {
-	record := Live{
-		Id:             live.Id,
-		Name:           live.Name,
-		Location:       live.Location,
-		Date:           live.Date,
-		PerformanceFee: live.PerformanceFee,
-		EquipmentCost:  live.EquipmentCost,
-	}
-	_, err := i.dao.Delete(&record)
-	checkErr(err, "DELETE Live QUERY failed.")
 	return err
 }
 
