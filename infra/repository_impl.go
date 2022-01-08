@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const LAYOUT = "2006-01-02"
+
 type Dao interface {
 	AddTableWithName(i interface{}, name string) *gorp.TableMap
 	Insert(list ...interface{}) error
@@ -26,7 +28,7 @@ func NewLiveRepositoryAlpha(db *sql.DB) *LiveRepositoryAlpha {
 }
 
 func (a *LiveRepositoryAlpha) FindByDate(date *time.Time) *domain.Live {
-	rows, err := a.db.Query(`SELECT * FROM Live WHERE date = ?`, date.Format("2006-01-02"))
+	rows, err := a.db.Query(`SELECT * FROM Live WHERE date = ?`, date.Format(LAYOUT))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,12 +48,23 @@ func (a *LiveRepositoryAlpha) FindByDate(date *time.Time) *domain.Live {
 	return live.ToModel()
 }
 
+func (a *LiveRepositoryAlpha) Create(live *domain.Live) error {
+	_, err := a.db.Exec(
+		`INSERT INTO Live(name, location, date, performance_fee, equipment_cost) VALUES ( ?, ?, ?, ?, ? )`,
+		live.Name, live.Location, live.Date.Format(LAYOUT), live.PerformanceFee, live.EquipmentCost)
+	return err
+}
+
 func (a *LiveRepositoryAlpha) Update(live *domain.Live) error {
-	panic("implement me")
+	_, err := a.db.Exec(
+		`UPDATE Live SET name = ?, location = ?, date = ?, performance_fee = ?, equipment_cost = ?`,
+		live.Name, live.Location, live.Date.Format(LAYOUT), live.PerformanceFee, live.EquipmentCost)
+	return err
 }
 
 func (a *LiveRepositoryAlpha) Delete(live *domain.Live) error {
-	panic("implement me")
+	_, err := a.db.Exec(`DELETE FROM Live WHERE id = ?`, live.Id)
+	return err
 }
 
 type LiveRepositoryImpl struct {
