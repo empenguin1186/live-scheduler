@@ -6,12 +6,12 @@ import (
 )
 
 type Live struct {
-	Id             int       `db:"id, primarykey, autoincrement"`
-	Name           string    `db:"name"`
-	Location       string    `db:"location"`
-	Date           time.Time `db:"date"`
-	PerformanceFee int       `db:"performance_fee"`
-	EquipmentCost  int       `db:"equipment_cost"`
+	Id             int
+	Name           string
+	Location       string
+	Date           time.Time
+	PerformanceFee int
+	EquipmentCost  int
 }
 
 func (l *Live) ToModel() *domain.Live {
@@ -19,9 +19,9 @@ func (l *Live) ToModel() *domain.Live {
 }
 
 type Band struct {
-	Name   string `db:"name"`
-	LiveId int    `db:"live_id, primarykey"`
-	Turn   int    `db:"turn"`
+	Name   string
+	LiveId int
+	Turn   int
 }
 
 func (r *Band) ToModel() *domain.Band {
@@ -29,10 +29,10 @@ func (r *Band) ToModel() *domain.Band {
 }
 
 type BandMember struct {
-	LiveId     int    `db:"live_id, primarykey"`
-	Turn       int    `db:"turn, primarykey"`
-	MemberName string `db:"member_name, primarykey"`
-	MemberPart string `db:"member_part, primarykey"`
+	LiveId     int
+	Turn       int
+	MemberName string
+	MemberPart string
 }
 
 func (r *BandMember) ToModel() *domain.Player {
@@ -40,8 +40,8 @@ func (r *BandMember) ToModel() *domain.Player {
 }
 
 type Player struct {
-	Name string `db:"name, primarykey"`
-	Part string `db:"part, primarykey"`
+	Name string
+	Part string
 }
 
 func (p *Player) ToModel() *domain.Player {
