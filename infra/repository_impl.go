@@ -17,6 +17,43 @@ type Dao interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
+type LiveRepositoryAlpha struct {
+	db *sql.DB
+}
+
+func NewLiveRepositoryAlpha(db *sql.DB) *LiveRepositoryAlpha {
+	return &LiveRepositoryAlpha{db: db}
+}
+
+func (a *LiveRepositoryAlpha) FindByDate(date *time.Time) *domain.Live {
+	rows, err := a.db.Query(`SELECT * FROM Live WHERE date = ?`, date.Format("2006-01-02"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	var lives []Live
+	for rows.Next() {
+		var id int
+		var name string
+		var location string
+		var date time.Time
+		var performanceFee int
+		var equipmentCost int
+
+		err = rows.Scan(&id, &name, &location, &date, &performanceFee, &equipmentCost)
+		lives = append(lives, Live{Id: id, Name: name, Location: location, Date: date, PerformanceFee: performanceFee, EquipmentCost: equipmentCost})
+	}
+	live := lives[0]
+	return live.ToModel()
+}
+
+func (a *LiveRepositoryAlpha) Update(live *domain.Live) error {
+	panic("implement me")
+}
+
+func (a *LiveRepositoryAlpha) Delete(live *domain.Live) error {
+	panic("implement me")
+}
+
 type LiveRepositoryImpl struct {
 	dao Dao
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type LiveRepository interface {
-	FindByDate(time *time.Time) *Live
+	FindByDate(date *time.Time) *Live
 	Create(live *Live) error
 	Update(live *Live) error
 	Delete(live *Live) error
