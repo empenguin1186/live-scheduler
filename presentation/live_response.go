@@ -17,7 +17,7 @@ type LiveResponse struct {
 	// 1バンドあたりの機材費
 	EquipmentCost int `json:"equipment_cost"`
 	// 出演するバンド
-	Band []*BandResponsePart `json:"band"`
+	Band []*BandResponsePart `json:"band,omitempty"`
 }
 
 func NewLiveResponse(liveModel *domain.LiveModel) *LiveResponse {
@@ -53,7 +53,7 @@ type BandResponsePart struct {
 	// 出演順
 	Turn int `json:"turn"`
 	// メンバー
-	Member []*MemberResponsePart `json:"member"`
+	Member []*MemberResponsePart `json:"member,omitempty"`
 }
 
 type MemberResponsePart struct {
