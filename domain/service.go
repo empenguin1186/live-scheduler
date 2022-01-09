@@ -1,13 +1,14 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 )
 
 type LiveService interface {
 	GetByDate(date *time.Time) (*LiveModel, error)
 	Register(live *Live) error
+	Update(live *Live) error
+	Delete(live *Live) error
 }
 
 type LiveServiceImpl struct {
@@ -52,5 +53,23 @@ func (s *LiveServiceImpl) GetByDate(date *time.Time) (*LiveModel, error) {
 }
 
 func (s *LiveServiceImpl) Register(live *Live) error {
-	return fmt.Errorf("hoge")
+	err := s.liveRepository.Create(live)
+	return verifyAndGetError(err)
+}
+
+func (s *LiveServiceImpl) Update(live *Live) error {
+	err := s.liveRepository.Update(live)
+	return verifyAndGetError(err)
+}
+
+func (s *LiveServiceImpl) Delete(live *Live) error {
+	err := s.liveRepository.Delete(live)
+	return verifyAndGetError(err)
+}
+
+func verifyAndGetError(err error) error {
+	if err != nil {
+		return err
+	}
+	return nil
 }
