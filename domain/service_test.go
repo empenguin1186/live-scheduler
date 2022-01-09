@@ -18,6 +18,21 @@ func (m *LiveRepositoryMock) FindByDate(time *time.Time) (*Live, error) {
 	return args.Get(0).(*Live), args.Error(1)
 }
 
+func (m *LiveRepositoryMock) Create(live *Live) error {
+	args := m.Called(live)
+	return args.Error(0)
+}
+
+func (m *LiveRepositoryMock) Update(live *Live) error {
+	args := m.Called(live)
+	return args.Error(0)
+}
+
+func (m *LiveRepositoryMock) Delete(live *Live) error {
+	args := m.Called(live)
+	return args.Error(0)
+}
+
 type BandRepositoryMock struct {
 	mock.Mock
 	BandRepository
@@ -176,10 +191,81 @@ func TestGetByDate(t *testing.T) {
 		// then
 		assertion := assert.New(t)
 		if tc.isNormal {
-			assertion.Equal(&tc.expectedLive, actual, fmt.Errorf("テスト名: %s", tc.testName))
+			assertion.Equal(&tc.expectedLive, actual, fmt.Sprintf("テスト名: %s", tc.testName))
 			assertion.Nil(err)
 		} else {
-			assertion.Equal(tc.expectedError, err, fmt.Errorf("テスト名: %s", tc.testName))
+			assertion.Equal(tc.expectedError, err, fmt.Sprintf("テスト名: %s", tc.testName))
 		}
+	}
+}
+
+var testCase = []struct {
+	testName      string
+	expectedError error
+}{
+	{
+		testName:      "正常系",
+		expectedError: nil,
+	},
+	{
+		testName:      "異常系",
+		expectedError: fmt.Errorf("dummy message"),
+	},
+}
+
+func TestRegister(t *testing.T) {
+	// given
+	live := Live{Id: 1, Name: "name", Location: "location", Date: now, PerformanceFee: 5500, EquipmentCost: 2000}
+
+	for _, tc := range testCase {
+		liveRepository := new(LiveRepositoryMock)
+		liveRepository.On("Create", &live).Return(tc.expectedError).Once()
+		bandRepository := new(BandRepositoryMock)
+		bandMemberRepository := new(BandMemberRepositoryMock)
+		liveService := NewLiveServiceImpl(liveRepository, bandRepository, bandMemberRepository)
+
+		// when
+		actual := liveService.Register(&live)
+
+		// then
+		assert.Equal(t, tc.expectedError, actual, fmt.Sprintf("テスト名: %s", tc.testName))
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	// given
+	live := Live{Id: 1, Name: "name", Location: "location", Date: now, PerformanceFee: 5500, EquipmentCost: 2000}
+
+	for _, tc := range testCase {
+		liveRepository := new(LiveRepositoryMock)
+		liveRepository.On("Update", &live).Return(tc.expectedError).Once()
+		bandRepository := new(BandRepositoryMock)
+		bandMemberRepository := new(BandMemberRepositoryMock)
+		liveService := NewLiveServiceImpl(liveRepository, bandRepository, bandMemberRepository)
+
+		// when
+		actual := liveService.Update(&live)
+
+		// then
+		assert.Equal(t, tc.expectedError, actual, fmt.Sprintf("テスト名: %s", tc.testName))
+	}
+}
+
+func TestDelete(t *testing.T) {
+	// given
+	live := Live{Id: 1, Name: "name", Location: "location", Date: now, PerformanceFee: 5500, EquipmentCost: 2000}
+
+	for _, tc := range testCase {
+		liveRepository := new(LiveRepositoryMock)
+		liveRepository.On("Delete", &live).Return(tc.expectedError).Once()
+		bandRepository := new(BandRepositoryMock)
+		bandMemberRepository := new(BandMemberRepositoryMock)
+		liveService := NewLiveServiceImpl(liveRepository, bandRepository, bandMemberRepository)
+
+		// when
+		actual := liveService.Delete(&live)
+
+		// then
+		assert.Equal(t, tc.expectedError, actual, fmt.Sprintf("テスト名: %s", tc.testName))
 	}
 }
