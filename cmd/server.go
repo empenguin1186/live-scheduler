@@ -29,7 +29,7 @@ func main() {
 		bandRepository := infra.NewBandRepositoryImpl(db)
 		bandMemberRepository := infra.NewBandMemberRepositoryImpl(db)
 		//playerRepository := infra.NewPlayerRepositoryImpl(db)
-		liveService := domain.NewLiveService(liveRepository, bandRepository, bandMemberRepository)
+		liveService := domain.NewLiveServiceImpl(liveRepository, bandRepository, bandMemberRepository)
 
 		var date time.Time
 		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()

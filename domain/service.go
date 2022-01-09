@@ -4,17 +4,21 @@ import (
 	"time"
 )
 
-type LiveService struct {
+type LiveService interface {
+	GetByDate(date *time.Time) *LiveModel
+}
+
+type LiveServiceImpl struct {
 	liveRepository       LiveRepository
 	bandRepository       BandRepository
 	bandMemberRepository BandMemberRepository
 }
 
-func NewLiveService(liveRepository LiveRepository, bandRepository BandRepository, bandMemberRepository BandMemberRepository) *LiveService {
-	return &LiveService{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
+func NewLiveServiceImpl(liveRepository LiveRepository, bandRepository BandRepository, bandMemberRepository BandMemberRepository) *LiveServiceImpl {
+	return &LiveServiceImpl{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
 }
 
-func (s *LiveService) GetByDate(date *time.Time) *LiveModel {
+func (s *LiveServiceImpl) GetByDate(date *time.Time) *LiveModel {
 	live, _ := s.liveRepository.FindByDate(date)
 	bands, _ := s.bandRepository.FindByLiveId(live.Id)
 	var bandModels []*BandModel
