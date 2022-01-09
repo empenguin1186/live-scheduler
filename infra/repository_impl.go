@@ -22,7 +22,7 @@ func (a *LiveRepositoryImpl) FindByDate(date *time.Time) (*domain.Live, error) {
 	if err != nil {
 		return nil, err
 	}
-	var lives []Live
+	var lives []domain.Live
 	for rows.Next() {
 		var id int
 		var name string
@@ -32,13 +32,13 @@ func (a *LiveRepositoryImpl) FindByDate(date *time.Time) (*domain.Live, error) {
 		var equipmentCost int
 
 		err = rows.Scan(&id, &name, &location, &date, &performanceFee, &equipmentCost)
-		lives = append(lives, Live{Id: id, Name: name, Location: location, Date: date, PerformanceFee: performanceFee, EquipmentCost: equipmentCost})
+		lives = append(lives, domain.Live{Id: id, Name: name, Location: location, Date: date, PerformanceFee: performanceFee, EquipmentCost: equipmentCost})
 	}
 	if len(lives) == 0 {
 		return nil, fmt.Errorf("live not found")
 	}
 	live := lives[0]
-	return live.ToModel(), nil
+	return &live, nil
 }
 
 func (a *LiveRepositoryImpl) Create(live *domain.Live) error {
@@ -83,8 +83,8 @@ func (b *BandRepositoryImpl) FindByLiveId(id int) ([]*domain.Band, error) {
 		if err != nil {
 			return nil, err
 		}
-		band := Band{Name: name, LiveId: liveId, Turn: turn}
-		bands = append(bands, band.ToModel())
+		band := domain.Band{Name: name, LiveId: liveId, Turn: turn}
+		bands = append(bands, &band)
 	}
 	return bands, nil
 }
