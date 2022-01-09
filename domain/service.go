@@ -1,11 +1,13 @@
 package domain
 
 import (
+	"fmt"
 	"time"
 )
 
 type LiveService interface {
-	GetByDate(date *time.Time) *LiveModel
+	GetByDate(date *time.Time) (*LiveModel, error)
+	Register(live *Live) error
 }
 
 type LiveServiceImpl struct {
@@ -18,14 +20,26 @@ func NewLiveServiceImpl(liveRepository LiveRepository, bandRepository BandReposi
 	return &LiveServiceImpl{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
 }
 
-func (s *LiveServiceImpl) GetByDate(date *time.Time) *LiveModel {
-	live, _ := s.liveRepository.FindByDate(date)
-	bands, _ := s.bandRepository.FindByLiveId(live.Id)
+func (s *LiveServiceImpl) GetByDate(date *time.Time) (*LiveModel, error) {
+	live, err := s.liveRepository.FindByDate(date)
+	if err != nil {
+		return nil, err
+	}
+
+	bands, err := s.bandRepository.FindByLiveId(live.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	var bandModels []*BandModel
 	for _, band := range bands {
-		players, _ := s.bandMemberRepository.FindByLiveIdAndTurn(band.LiveId, band.Turn)
+		players, err := s.bandMemberRepository.FindByLiveIdAndTurn(band.LiveId, band.Turn)
+		if err != nil {
+			return nil, err
+		}
 		bandModels = append(bandModels, &BandModel{Name: band.Name, LiveId: band.LiveId, Turn: band.Turn, Player: players})
 	}
+
 	return &LiveModel{
 		Id:             live.Id,
 		Name:           live.Name,
@@ -34,5 +48,9 @@ func (s *LiveServiceImpl) GetByDate(date *time.Time) *LiveModel {
 		PerformanceFee: live.PerformanceFee,
 		EquipmentCost:  live.EquipmentCost,
 		Band:           bandModels,
-	}
+	}, nil
+}
+
+func (s *LiveServiceImpl) Register(live *Live) error {
+	return fmt.Errorf("hoge")
 }

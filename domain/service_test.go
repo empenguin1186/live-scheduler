@@ -67,12 +67,13 @@ func TestGetByDate(t *testing.T) {
 			&BandModel{Name: "band2", LiveId: 1, Turn: 2, Player: players2},
 		},
 	}
-	liveService := NewLiveService(liveRepository, bandRepository, bandMemberRepository)
+	liveService := NewLiveServiceImpl(liveRepository, bandRepository, bandMemberRepository)
 
 	// when
-	actual := liveService.GetByDate(&now)
+	actual, err := liveService.GetByDate(&now)
 
 	// then
 	assertion := assert.New(t)
 	assertion.Equal(&expected, actual)
+	assertion.Nil(err)
 }
