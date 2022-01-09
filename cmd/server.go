@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"live-scheduler/domain"
 	"live-scheduler/infra"
+	"live-scheduler/presentation"
 	"log"
 	"net/http"
 	"os"
@@ -35,7 +36,7 @@ func main() {
 		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
 		checkErr(err, "Invalid Query Parameter")
 		liveModel, err := liveService.GetByDate(&date)
-		return c.JSON(http.StatusOK, liveModel)
+		return c.JSON(http.StatusOK, presentation.NewLiveResponse(liveModel))
 	})
 	e.Logger.Fatal(e.Start(":1323"))
 }

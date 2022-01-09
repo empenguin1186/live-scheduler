@@ -17,16 +17,43 @@ type LiveResponse struct {
 	// 1バンドあたりの機材費
 	EquipmentCost int `json:"equipment_cost"`
 	// 出演するバンド
-	Band []BandResponsePart `json:"band"`
+	Band []*BandResponsePart `json:"band"`
+}
+
+func NewLiveResponse(liveModel *domain.LiveModel) *LiveResponse {
+	bands := liveModel.Band
+	var bandResponseParts []*BandResponsePart
+	for _, band := range bands {
+		var memberResponseParts []*MemberResponsePart
+		for _, player := range band.Player {
+			memberResponseParts = append(memberResponseParts, &MemberResponsePart{
+				Name: player.Name,
+				Part: player.Part,
+			})
+		}
+		bandResponseParts = append(bandResponseParts, &BandResponsePart{
+			Name:   band.Name,
+			Turn:   band.Turn,
+			Member: memberResponseParts,
+		})
+	}
+	return &LiveResponse{
+		Name:           liveModel.Name,
+		Location:       liveModel.Location,
+		Date:           liveModel.Date,
+		PerformanceFee: liveModel.PerformanceFee,
+		EquipmentCost:  liveModel.EquipmentCost,
+		Band:           bandResponseParts,
+	}
 }
 
 type BandResponsePart struct {
 	// バンド名
 	Name string `json:"name"`
 	// 出演順
-	Order int `json:"order"`
+	Turn int `json:"turn"`
 	// メンバー
-	Member []MemberResponsePart `json:"member"`
+	Member []*MemberResponsePart `json:"member"`
 }
 
 type MemberResponsePart struct {
