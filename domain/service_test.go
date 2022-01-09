@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strings"
 	"testing"
 	"time"
 )
@@ -79,8 +80,6 @@ func TestGetByDate(t *testing.T) {
 	tests := []struct {
 		// テスト名
 		testName string
-		// true の場合正常系
-		isNormal bool
 		// LiveRepository のモックを返す関数
 		liveRepository func() *LiveRepositoryMock
 		// BandRepository のモックを返す関数
@@ -94,7 +93,6 @@ func TestGetByDate(t *testing.T) {
 	}{
 		{
 			testName: "正常系",
-			isNormal: true,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
 				liveRepository.On("FindByDate", &now).Return(&live, nil).Once()
@@ -117,7 +115,6 @@ func TestGetByDate(t *testing.T) {
 		},
 		{
 			testName: "異常系_Liveレコード取得処理でエラー発生",
-			isNormal: false,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
 				liveRepository.On("FindByDate", &now).Return(&Live{}, expectedError).Once()
@@ -138,7 +135,6 @@ func TestGetByDate(t *testing.T) {
 		},
 		{
 			testName: "異常系_Bandレコード取得処理でエラー発生",
-			isNormal: false,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
 				liveRepository.On("FindByDate", &now).Return(&live, nil).Once()
@@ -159,7 +155,6 @@ func TestGetByDate(t *testing.T) {
 		},
 		{
 			testName: "異常系_BandMemberレコード取得処理でエラー発生",
-			isNormal: false,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
 				liveRepository.On("FindByDate", &now).Return(&live, nil).Once()
@@ -190,7 +185,7 @@ func TestGetByDate(t *testing.T) {
 
 		// then
 		assertion := assert.New(t)
-		if tc.isNormal {
+		if strings.Contains(tc.testName, "正常系") {
 			assertion.Equal(&tc.expectedLive, actual, fmt.Sprintf("テスト名: %s", tc.testName))
 			assertion.Nil(err)
 		} else {
