@@ -62,13 +62,20 @@ func TestGetByDate(t *testing.T) {
 
 	// given
 	tests := []struct {
-		testName             string
-		isNormal             bool
-		liveRepository       func() *LiveRepositoryMock
-		bandRepository       func() *BandRepositoryMock
+		// テスト名
+		testName string
+		// true の場合正常系
+		isNormal bool
+		// LiveRepository のモックを返す関数
+		liveRepository func() *LiveRepositoryMock
+		// BandRepository のモックを返す関数
+		bandRepository func() *BandRepositoryMock
+		// BandMemberRepository のモックを返す関数
 		bandMemberRepository func() *BandMemberRepositoryMock
-		expectedLive         LiveModel
-		expectedError        error
+		// 戻り値の期待値(LiveModel)
+		expectedLive LiveModel
+		// 戻り値の期待値(error)
+		expectedError error
 	}{
 		{
 			testName: "正常系",
@@ -94,7 +101,7 @@ func TestGetByDate(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			testName: "Liveレコード取得処理でエラー発生",
+			testName: "異常系_Liveレコード取得処理でエラー発生",
 			isNormal: false,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
@@ -115,7 +122,7 @@ func TestGetByDate(t *testing.T) {
 			expectedError: expectedError,
 		},
 		{
-			testName: "Bandレコード取得処理でエラー発生",
+			testName: "異常系_Bandレコード取得処理でエラー発生",
 			isNormal: false,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
@@ -136,7 +143,7 @@ func TestGetByDate(t *testing.T) {
 			expectedError: expectedError,
 		},
 		{
-			testName: "BandMemberレコード取得処理でエラー発生",
+			testName: "異常系_BandMemberレコード取得処理でエラー発生",
 			isNormal: false,
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
