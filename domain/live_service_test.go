@@ -100,11 +100,11 @@ func TestDelete(t *testing.T) {
 
 	for _, tc := range testCase {
 		liveRepository := new(LiveRepositoryMock)
-		liveRepository.On("Delete", &live).Return(tc.expectedError).Once()
+		liveRepository.On("Delete", live.Id).Return(tc.expectedError).Once()
 		liveService := NewLiveServiceImpl(liveRepository)
 
 		// when
-		actual := liveService.Delete(&live)
+		actual := liveService.Delete(live.Id)
 
 		// then
 		assert.Equal(t, tc.expectedError, actual, fmt.Sprintf("テスト名: %s", tc.testName))

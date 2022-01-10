@@ -9,7 +9,7 @@ type LiveRepository interface {
 	FindByPeriod(start *time.Time, end *time.Time) ([]*Live, error)
 	Create(live *Live) error
 	Update(live *Live) error
-	Delete(live *Live) error
+	Delete(id int) error
 }
 
 type BandRepository interface {

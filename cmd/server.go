@@ -71,6 +71,49 @@ func main() {
 		}
 		return context.JSON(http.StatusOK, presentation.NewLiveDescResponse(liveModel))
 	})
+
+	e.POST("/live", func(context echo.Context) error {
+		live := new(presentation.LiveResponse)
+		if err = context.Bind(live); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err = context.Validate(live); err != nil {
+			return err
+		}
+		err := liveService.Register(live.ToModel())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.JSON(http.StatusOK, live)
+	})
+
+	e.PATCH("/live", func(context echo.Context) error {
+		live := new(presentation.LiveResponse)
+		if err = context.Bind(live); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err = context.Validate(live); err != nil {
+			return err
+		}
+		err := liveService.Update(live.ToModel())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.JSON(http.StatusOK, live)
+	})
+
+	e.DELETE("/live/:id", func(context echo.Context) error {
+		liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		err = liveService.Delete(int(liveId))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.NoContent(http.StatusOK)
+	})
+
 	e.Logger.Fatal(e.Start(":1323"))
 }
 

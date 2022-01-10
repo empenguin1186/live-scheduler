@@ -8,7 +8,7 @@ type LiveService interface {
 	GetByPeriod(start *time.Time, end *time.Time) ([]*Live, error)
 	Register(live *Live) error
 	Update(live *Live) error
-	Delete(live *Live) error
+	Delete(id int) error
 }
 
 type LiveServiceImpl struct {
@@ -37,8 +37,8 @@ func (s *LiveServiceImpl) Update(live *Live) error {
 	return verifyAndGetError(err)
 }
 
-func (s *LiveServiceImpl) Delete(live *Live) error {
-	err := s.liveRepository.Delete(live)
+func (s *LiveServiceImpl) Delete(id int) error {
+	err := s.liveRepository.Delete(id)
 	return verifyAndGetError(err)
 }
 

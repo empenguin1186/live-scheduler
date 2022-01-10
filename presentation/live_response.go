@@ -20,6 +20,17 @@ type LiveResponse struct {
 	EquipmentCost int `json:"equipment_cost"`
 }
 
+func (r LiveResponse) ToModel() *domain.Live {
+	return &domain.Live{
+		Id:             r.Id,
+		Name:           r.Name,
+		Location:       r.Location,
+		Date:           r.Date,
+		PerformanceFee: r.PerformanceFee,
+		EquipmentCost:  r.EquipmentCost,
+	}
+}
+
 func NewLiveResponse(live *domain.Live) *LiveResponse {
 	return &LiveResponse{
 		Id:             live.Id,

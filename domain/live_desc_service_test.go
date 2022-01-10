@@ -34,8 +34,8 @@ func (m *LiveRepositoryMock) Update(live *Live) error {
 	return args.Error(0)
 }
 
-func (m *LiveRepositoryMock) Delete(live *Live) error {
-	args := m.Called(live)
+func (m *LiveRepositoryMock) Delete(id int) error {
+	args := m.Called(id)
 	return args.Error(0)
 }
 

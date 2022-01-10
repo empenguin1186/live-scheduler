@@ -66,8 +66,8 @@ func (i *LiveRepositoryImpl) Update(live *domain.Live) error {
 	return err
 }
 
-func (i *LiveRepositoryImpl) Delete(live *domain.Live) error {
-	_, err := i.db.Exec(`DELETE FROM Live WHERE id = ?`, live.Id)
+func (i *LiveRepositoryImpl) Delete(id int) error {
+	_, err := i.db.Exec(`DELETE FROM Live WHERE id = ?`, id)
 	return err
 }
 
