@@ -26,16 +26,16 @@ func TestSample(t *testing.T) {
 		t.Error(err.Error())
 	}
 	defer db.Close()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM Live WHERE date = ?")).
-		WithArgs(now.Format("2006-01-02")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM Live WHERE date >= ? AND date <= ?")).
+		WithArgs(now.Format("2006-01-02"), now.Format("2006-01-02")).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "location", "date", "performance_fee", "equipment_cost"}).
 			AddRow(expected.Id, expected.Name, expected.Location, expected.Date, expected.PerformanceFee, expected.EquipmentCost))
 	repository := NewLiveRepositoryImpl(db)
 
 	// when
-	actual, err := repository.FindByDate(&now)
+	actual, err := repository.FindByPeriod(&now, &now)
 
 	// then
-	assert.Equal(t, &expected, actual)
+	assert.Equal(t, []*domain.Live{&expected}, actual)
 	assert.Nil(t, err)
 }
