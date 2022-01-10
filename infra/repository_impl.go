@@ -2,7 +2,6 @@ package infra
 
 import (
 	"database/sql"
-	"fmt"
 	"live-scheduler/domain"
 	"time"
 )
@@ -17,46 +16,48 @@ func NewLiveRepositoryImpl(db *sql.DB) *LiveRepositoryImpl {
 	return &LiveRepositoryImpl{db: db}
 }
 
-func (a *LiveRepositoryImpl) FindByDate(date *time.Time) (*domain.Live, error) {
-	rows, err := a.db.Query(`SELECT * FROM Live WHERE date = ?`, date.Format(LAYOUT))
+func (i *LiveRepositoryImpl) FindByPeriod(start *time.Time, end *time.Time) ([]*domain.Live, error) {
+	rows, err := i.db.Query(
+		`SELECT * FROM Live WHERE date >= ? AND date <= ?`,
+		start.Format(LAYOUT), end.Format(LAYOUT))
 	if err != nil {
 		return nil, err
 	}
-	var lives []domain.Live
+	var lives []*domain.Live
 	for rows.Next() {
-		var id int
-		var name string
-		var location string
+		var id, performanceFee, equipmentCost int
+		var name, location string
 		var date time.Time
-		var performanceFee int
-		var equipmentCost int
 
 		err = rows.Scan(&id, &name, &location, &date, &performanceFee, &equipmentCost)
-		lives = append(lives, domain.Live{Id: id, Name: name, Location: location, Date: date, PerformanceFee: performanceFee, EquipmentCost: equipmentCost})
+		lives = append(lives, &domain.Live{
+			Id:             id,
+			Name:           name,
+			Location:       location,
+			Date:           date,
+			PerformanceFee: performanceFee,
+			EquipmentCost:  equipmentCost,
+		})
 	}
-	if len(lives) == 0 {
-		return nil, fmt.Errorf("live not found")
-	}
-	live := lives[0]
-	return &live, nil
+	return lives, nil
 }
 
-func (a *LiveRepositoryImpl) Create(live *domain.Live) error {
-	_, err := a.db.Exec(
+func (i *LiveRepositoryImpl) Create(live *domain.Live) error {
+	_, err := i.db.Exec(
 		`INSERT INTO Live(name, location, date, performance_fee, equipment_cost) VALUES ( ?, ?, ?, ?, ? )`,
 		live.Name, live.Location, live.Date.Format(LAYOUT), live.PerformanceFee, live.EquipmentCost)
 	return err
 }
 
-func (a *LiveRepositoryImpl) Update(live *domain.Live) error {
-	_, err := a.db.Exec(
+func (i *LiveRepositoryImpl) Update(live *domain.Live) error {
+	_, err := i.db.Exec(
 		`UPDATE Live SET name = ?, location = ?, date = ?, performance_fee = ?, equipment_cost = ? WHERE id = ?`,
 		live.Name, live.Location, live.Date.Format(LAYOUT), live.PerformanceFee, live.EquipmentCost, live.Id)
 	return err
 }
 
-func (a *LiveRepositoryImpl) Delete(live *domain.Live) error {
-	_, err := a.db.Exec(`DELETE FROM Live WHERE id = ?`, live.Id)
+func (i *LiveRepositoryImpl) Delete(live *domain.Live) error {
+	_, err := i.db.Exec(`DELETE FROM Live WHERE id = ?`, live.Id)
 	return err
 }
 
@@ -76,8 +77,7 @@ func (b *BandRepositoryImpl) FindByLiveId(id int) ([]*domain.Band, error) {
 	var bands []*domain.Band
 	for rows.Next() {
 		var name string
-		var liveId int
-		var turn int
+		var liveId, turn int
 
 		err = rows.Scan(&name, &liveId, &turn)
 		if err != nil {
@@ -123,10 +123,8 @@ func (b *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) ([]*dom
 	}
 	var players []*domain.Player
 	for rows.Next() {
-		var liveId int
-		var turn int
-		var name string
-		var part string
+		var liveId, turn int
+		var name, part string
 
 		err = rows.Scan(&liveId, &turn, &name, &part)
 		if err != nil {
@@ -182,8 +180,7 @@ func (p *PlayerRepositoryImpl) FindByPart(part *domain.Part) ([]*domain.Player, 
 	}
 	var players []*domain.Player
 	for rows.Next() {
-		var name string
-		var part string
+		var name, part string
 
 		err = rows.Scan(&name, &part)
 		if err != nil {

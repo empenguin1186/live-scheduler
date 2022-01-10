@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -22,10 +23,14 @@ func NewLiveServiceImpl(liveRepository LiveRepository, bandRepository BandReposi
 }
 
 func (s *LiveServiceImpl) GetByDate(date *time.Time) (*LiveModel, error) {
-	live, err := s.liveRepository.FindByDate(date)
+	lives, err := s.liveRepository.FindByPeriod(date, date)
 	if err != nil {
 		return nil, err
 	}
+	if len(lives) == 0 {
+		return nil, fmt.Errorf("live not found")
+	}
+	live := lives[0]
 
 	bands, err := s.bandRepository.FindByLiveId(live.Id)
 	if err != nil {
