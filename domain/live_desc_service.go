@@ -1,12 +1,7 @@
 package domain
 
-import (
-	"fmt"
-	"time"
-)
-
 type LiveDescService interface {
-	GetByDate(date *time.Time) (*LiveModel, error)
+	GetById(id int) (*LiveModel, error)
 }
 
 type LiveDescServiceImpl struct {
@@ -19,15 +14,11 @@ func NewLiveDescServiceImpl(liveRepository LiveRepository, bandRepository BandRe
 	return &LiveDescServiceImpl{liveRepository: liveRepository, bandRepository: bandRepository, bandMemberRepository: bandMemberRepository}
 }
 
-func (i *LiveDescServiceImpl) GetByDate(date *time.Time) (*LiveModel, error) {
-	lives, err := i.liveRepository.FindByPeriod(date, date)
+func (i *LiveDescServiceImpl) GetById(id int) (*LiveModel, error) {
+	live, err := i.liveRepository.FindById(id)
 	if err != nil {
 		return nil, err
 	}
-	if len(lives) == 0 {
-		return nil, fmt.Errorf("live not found")
-	}
-	live := lives[0]
 
 	bands, err := i.bandRepository.FindByLiveId(live.Id)
 	if err != nil {

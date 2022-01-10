@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 const LAYOUT = "2006-01-02"
@@ -32,10 +31,12 @@ func main() {
 		//playerRepository := infra.NewPlayerRepositoryImpl(db)
 		liveService := domain.NewLiveDescServiceImpl(liveRepository, bandRepository, bandMemberRepository)
 
-		var date time.Time
-		err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
+		//var date time.Time
+		//err = echo.QueryParamsBinder(c).Time("date", &date, LAYOUT).BindError()
+		var liveId int
+		err = echo.QueryParamsBinder(c).Int("live_id", &liveId).BindError()
 		checkErr(err, "Invalid Query Parameter")
-		liveModel, err := liveService.GetByDate(&date)
+		liveModel, err := liveService.GetById(liveId)
 		return c.JSON(http.StatusOK, presentation.NewLiveResponse(liveModel))
 	})
 	e.Logger.Fatal(e.Start(":1323"))

@@ -16,6 +16,16 @@ func NewLiveRepositoryImpl(db *sql.DB) *LiveRepositoryImpl {
 	return &LiveRepositoryImpl{db: db}
 }
 
+func (i *LiveRepositoryImpl) FindById(id int) (*domain.Live, error) {
+	var live domain.Live
+	err := i.db.QueryRow(`SELECT * FROM Live WHERE id = ?`, id).
+		Scan(&live.Id, &live.Name, &live.Location, &live.Date, &live.PerformanceFee, &live.EquipmentCost)
+	if err != nil {
+		return nil, err
+	}
+	return &live, nil
+}
+
 func (i *LiveRepositoryImpl) FindByPeriod(start *time.Time, end *time.Time) ([]*domain.Live, error) {
 	rows, err := i.db.Query(
 		`SELECT * FROM Live WHERE date >= ? AND date <= ?`,

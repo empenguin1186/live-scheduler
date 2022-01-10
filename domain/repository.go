@@ -5,6 +5,7 @@ import (
 )
 
 type LiveRepository interface {
+	FindById(id int) (*Live, error)
 	FindByPeriod(start *time.Time, end *time.Time) ([]*Live, error)
 	Create(live *Live) error
 	Update(live *Live) error

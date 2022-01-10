@@ -14,6 +14,11 @@ type LiveRepositoryMock struct {
 	LiveRepository
 }
 
+func (m *LiveRepositoryMock) FindById(id int) (*Live, error) {
+	args := m.Called(id)
+	return args.Get(0).(*Live), args.Error(1)
+}
+
 func (m *LiveRepositoryMock) FindByPeriod(start *time.Time, end *time.Time) ([]*Live, error) {
 	args := m.Called(start, end)
 	return args.Get(0).([]*Live), args.Error(1)
@@ -95,7 +100,7 @@ func TestGetByDate(t *testing.T) {
 			testName: "正常系",
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
-				liveRepository.On("FindByPeriod", &now, &now).Return([]*Live{&live}, nil).Once()
+				liveRepository.On("FindById", live.Id).Return(&live, nil).Once()
 				return liveRepository
 			},
 			bandRepository: func() *BandRepositoryMock {
@@ -117,7 +122,7 @@ func TestGetByDate(t *testing.T) {
 			testName: "異常系_Liveレコード取得処理でエラー発生",
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
-				liveRepository.On("FindByPeriod", &now, &now).Return([]*Live{}, expectedError).Once()
+				liveRepository.On("FindById", live.Id).Return(&Live{}, expectedError).Once()
 				return liveRepository
 			},
 			bandRepository: func() *BandRepositoryMock {
@@ -134,30 +139,10 @@ func TestGetByDate(t *testing.T) {
 			expectedError: expectedError,
 		},
 		{
-			testName: "異常系_Liveレコードが空",
-			liveRepository: func() *LiveRepositoryMock {
-				liveRepository := new(LiveRepositoryMock)
-				liveRepository.On("FindByPeriod", &now, &now).Return([]*Live{}, nil).Once()
-				return liveRepository
-			},
-			bandRepository: func() *BandRepositoryMock {
-				bandRepository := new(BandRepositoryMock)
-				bandRepository.On("FindByLiveId", mock.Anything).Times(0)
-				return bandRepository
-			},
-			bandMemberRepository: func() *BandMemberRepositoryMock {
-				bandMemberRepository := new(BandMemberRepositoryMock)
-				bandMemberRepository.On("FindByLiveIdAndTurn", mock.Anything, mock.Anything).Times(0)
-				return bandMemberRepository
-			},
-			expectedLive:  LiveModel{},
-			expectedError: fmt.Errorf("live not found"),
-		},
-		{
 			testName: "異常系_Bandレコード取得処理でエラー発生",
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
-				liveRepository.On("FindByPeriod", &now, &now).Return([]*Live{&live}, nil).Once()
+				liveRepository.On("FindById", live.Id).Return(&live, nil).Once()
 				return liveRepository
 			},
 			bandRepository: func() *BandRepositoryMock {
@@ -177,7 +162,7 @@ func TestGetByDate(t *testing.T) {
 			testName: "異常系_BandMemberレコード取得処理でエラー発生",
 			liveRepository: func() *LiveRepositoryMock {
 				liveRepository := new(LiveRepositoryMock)
-				liveRepository.On("FindByPeriod", &now, &now).Return([]*Live{&live}, nil).Once()
+				liveRepository.On("FindById", live.Id).Return(&live, nil).Once()
 				return liveRepository
 			},
 			bandRepository: func() *BandRepositoryMock {
@@ -201,7 +186,7 @@ func TestGetByDate(t *testing.T) {
 		liveDescService := NewLiveDescServiceImpl(tc.liveRepository(), tc.bandRepository(), tc.bandMemberRepository())
 
 		// when
-		actual, err := liveDescService.GetByDate(&now)
+		actual, err := liveDescService.GetById(live.Id)
 
 		// then
 		assertion := assert.New(t)

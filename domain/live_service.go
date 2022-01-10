@@ -20,11 +20,11 @@ func NewLiveServiceImpl(liveRepository LiveRepository) *LiveServiceImpl {
 }
 
 func (s *LiveServiceImpl) GetByPeriod(start *time.Time, end *time.Time) ([]*Live, error) {
-	live, err := s.liveRepository.FindByPeriod(start, end)
+	lives, err := s.liveRepository.FindByPeriod(start, end)
 	if err != nil {
 		return nil, err
 	}
-	return live, nil
+	return lives, nil
 }
 
 func (s *LiveServiceImpl) Register(live *Live) error {
