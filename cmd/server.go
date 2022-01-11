@@ -32,6 +32,7 @@ func main() {
 	liveService := domain.NewLiveServiceImpl(liveRepository)
 
 	e := echo.New()
+	e.Validator = presentation.NewCustomValidator()
 	e.GET("/live", func(context echo.Context) error {
 		var start time.Time
 		err = echo.QueryParamsBinder(context).Time("start", &start, LAYOUT).BindError()
@@ -57,10 +58,6 @@ func main() {
 	})
 
 	e.GET("/live/:id", func(context echo.Context) error {
-		//playerRepository := infra.NewPlayerRepositoryImpl(db)
-
-		//var date time.Time
-		//err = echo.QueryParamsBinder(context).Time("date", &date, LAYOUT).BindError()
 		liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -73,7 +70,7 @@ func main() {
 	})
 
 	e.POST("/live", func(context echo.Context) error {
-		live := new(presentation.LiveResponse)
+		live := new(presentation.LiveCreateRequest)
 		if err = context.Bind(live); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -88,7 +85,7 @@ func main() {
 	})
 
 	e.PATCH("/live", func(context echo.Context) error {
-		live := new(presentation.LiveResponse)
+		live := new(presentation.LivePatchRequest)
 		if err = context.Bind(live); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
