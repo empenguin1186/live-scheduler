@@ -9,10 +9,7 @@ import (
 	"live-scheduler/infra"
 	"live-scheduler/presentation"
 	"log"
-	"net/http"
 	"os"
-	"strconv"
-	"time"
 )
 
 const LAYOUT = "2006-01-02"
@@ -32,86 +29,88 @@ func main() {
 	liveService := domain.NewLiveServiceImpl(liveRepository)
 
 	e := echo.New()
-	e.Validator = presentation.NewCustomValidator()
-	e.GET("/live", func(context echo.Context) error {
-		var start time.Time
-		err = echo.QueryParamsBinder(context).Time("start", &start, LAYOUT).BindError()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		var end time.Time
-		err = echo.QueryParamsBinder(context).Time("end", &end, LAYOUT).BindError()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		lives, err := liveService.GetByPeriod(&start, &end)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		var liveResponse []*presentation.LiveResponse
-		for _, e := range lives {
-			liveResponse = append(liveResponse, presentation.NewLiveResponse(e))
-		}
-		return context.JSON(http.StatusOK, liveResponse)
-	})
-
-	e.GET("/live/:id", func(context echo.Context) error {
-		liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		liveModel, err := liveDescService.GetById(int(liveId))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return context.JSON(http.StatusOK, presentation.NewLiveDescResponse(liveModel))
-	})
-
-	e.POST("/live", func(context echo.Context) error {
-		live := new(presentation.LiveCreateRequest)
-		if err = context.Bind(live); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		if err = context.Validate(live); err != nil {
-			return err
-		}
-		err := liveService.Register(live.ToModel())
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return context.JSON(http.StatusOK, live)
-	})
-
-	e.PATCH("/live", func(context echo.Context) error {
-		live := new(presentation.LivePatchRequest)
-		if err = context.Bind(live); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		if err = context.Validate(live); err != nil {
-			return err
-		}
-		err := liveService.Update(live.ToModel())
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return context.JSON(http.StatusOK, live)
-	})
-
-	e.DELETE("/live/:id", func(context echo.Context) error {
-		liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		err = liveService.Delete(int(liveId))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return context.NoContent(http.StatusOK)
-	})
-
-	e.Logger.Fatal(e.Start(":1323"))
+	server := presentation.NewLiveController(e, liveService, liveDescService)
+	server.Start()
+	//e.Validator = presentation.NewCustomValidator()
+	//e.GET("/live", func(context echo.Context) error {
+	//	var start time.Time
+	//	err = echo.QueryParamsBinder(context).Time("start", &start, LAYOUT).BindError()
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	//	}
+	//
+	//	var end time.Time
+	//	err = echo.QueryParamsBinder(context).Time("end", &end, LAYOUT).BindError()
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	//	}
+	//
+	//	lives, err := liveService.GetByPeriod(&start, &end)
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	//	}
+	//	var liveResponse []*presentation.LiveResponse
+	//	for _, e := range lives {
+	//		liveResponse = append(liveResponse, presentation.NewLiveResponse(e))
+	//	}
+	//	return context.JSON(http.StatusOK, liveResponse)
+	//})
+	//
+	//e.GET("/live/:id", func(context echo.Context) error {
+	//	liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	//	}
+	//	liveModel, err := liveDescService.GetById(int(liveId))
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	//	}
+	//	return context.JSON(http.StatusOK, presentation.NewLiveDescResponse(liveModel))
+	//})
+	//
+	//e.POST("/live", func(context echo.Context) error {
+	//	live := new(presentation.LiveCreateRequest)
+	//	if err = context.Bind(live); err != nil {
+	//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	//	}
+	//	if err = context.Validate(live); err != nil {
+	//		return err
+	//	}
+	//	err := liveService.Register(live.ToModel())
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	//	}
+	//	return context.JSON(http.StatusOK, live)
+	//})
+	//
+	//e.PATCH("/live", func(context echo.Context) error {
+	//	live := new(presentation.LivePatchRequest)
+	//	if err = context.Bind(live); err != nil {
+	//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	//	}
+	//	if err = context.Validate(live); err != nil {
+	//		return err
+	//	}
+	//	err := liveService.Update(live.ToModel())
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	//	}
+	//	return context.JSON(http.StatusOK, live)
+	//})
+	//
+	//e.DELETE("/live/:id", func(context echo.Context) error {
+	//	liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	//	}
+	//	err = liveService.Delete(int(liveId))
+	//	if err != nil {
+	//		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	//	}
+	//	return context.NoContent(http.StatusOK)
+	//})
+	//
+	//e.Logger.Fatal(e.Start(":1323"))
 }
 
 func checkErr(err error, msg string) {
