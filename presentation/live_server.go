@@ -10,21 +10,21 @@ import (
 
 const LAYOUT = "2006-01-02"
 
-type Server struct {
+type LiveServer struct {
 	e               *echo.Echo
 	liveService     domain.LiveService
 	liveDescService domain.LiveDescService
 }
 
-func NewLiveController(e *echo.Echo, liveService domain.LiveService, liveDescService domain.LiveDescService) *Server {
-	return &Server{
+func NewLiveServer(e *echo.Echo, liveService domain.LiveService, liveDescService domain.LiveDescService) *LiveServer {
+	return &LiveServer{
 		e:               e,
 		liveService:     liveService,
 		liveDescService: liveDescService,
 	}
 }
 
-func (s *Server) Start() {
+func (s *LiveServer) Start() {
 	s.e.Validator = NewCustomValidator()
 	s.e.GET("/live", func(context echo.Context) error {
 		var start time.Time
