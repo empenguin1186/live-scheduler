@@ -12,15 +12,15 @@ import (
 	"os"
 )
 
-const LAYOUT = "2006-01-02"
-
 func main() {
 	user := os.Getenv("USER")
 	pass := os.Getenv("PASS")
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(localhost:3306)/sample?parseTime=true", user, pass)
 	db, err := sql.Open("mysql", dataSourceName)
 	defer db.Close()
-	checkErr(err, "db connection initialization failed.")
+	if err != nil {
+		log.Fatalln("db connection initialization failed.", err)
+	}
 
 	liveRepository := infra.NewLiveRepositoryImpl(db)
 	bandRepository := infra.NewBandRepositoryImpl(db)
@@ -31,10 +31,4 @@ func main() {
 	e := echo.New()
 	server := presentation.NewLiveServer(e, liveService, liveDescService)
 	server.Start()
-}
-
-func checkErr(err error, msg string) {
-	if err != nil {
-		log.Fatalln(msg, err)
-	}
 }
