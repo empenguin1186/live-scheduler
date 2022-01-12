@@ -57,6 +57,34 @@ func (r LivePatchRequest) ToModel() *domain.Live {
 	}
 }
 
+type BandCreateRequest struct {
+	LiveId int    `json:"live_id" validate:"required"`
+	Name   string `json:"name" validate:"required"`
+	Turn   int    `json:"turn" validate:"required"`
+}
+
+func (r BandCreateRequest) ToModel() *domain.Band {
+	return &domain.Band{
+		Name:   r.Name,
+		LiveId: r.LiveId,
+		Turn:   r.Turn,
+	}
+}
+
+type BandPatchRequest struct {
+	LiveId int    `json:"live_id"`
+	Name   string `json:"name"`
+	Turn   int    `json:"turn"`
+}
+
+func (r BandPatchRequest) ToModel() *domain.Band {
+	return &domain.Band{
+		Name:   r.Name,
+		LiveId: r.LiveId,
+		Turn:   r.Turn,
+	}
+}
+
 type CustomValidator struct {
 	validator *validator.Validate
 }

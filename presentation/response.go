@@ -93,6 +93,13 @@ type BandResponsePart struct {
 	Member []*MemberResponsePart `json:"member,omitempty"`
 }
 
+func NewBandResponsePart(band *domain.Band) *BandResponsePart {
+	return &BandResponsePart{
+		Name: band.Name,
+		Turn: band.Turn,
+	}
+}
+
 type MemberResponsePart struct {
 	Name string      `json:"name"`
 	Part domain.Part `json:"part"`

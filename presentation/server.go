@@ -14,13 +14,15 @@ type LiveServer struct {
 	e               *echo.Echo
 	liveService     domain.LiveService
 	liveDescService domain.LiveDescService
+	bandService     domain.BandService
 }
 
-func NewLiveServer(e *echo.Echo, liveService domain.LiveService, liveDescService domain.LiveDescService) *LiveServer {
+func NewLiveServer(e *echo.Echo, liveService domain.LiveService, liveDescService domain.LiveDescService, bandService domain.BandService) *LiveServer {
 	return &LiveServer{
 		e:               e,
 		liveService:     liveService,
 		liveDescService: liveDescService,
+		bandService:     bandService,
 	}
 }
 
@@ -98,6 +100,86 @@ func (s *LiveServer) Start() {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		err = s.liveService.Delete(int(liveId))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.NoContent(http.StatusOK)
+	})
+
+	s.e.GET("/live/:id/band", func(context echo.Context) error {
+		liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		bands, err := s.bandService.GetByLiveId(int(liveId))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		var response []*BandResponsePart
+		for _, e := range bands {
+			response = append(response, NewBandResponsePart(e))
+		}
+		return context.JSON(http.StatusOK, response)
+	})
+
+	s.e.POST("/live/:id/band", func(context echo.Context) error {
+		liveId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		band := new(BandCreateRequest)
+		if err := context.Bind(band); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err := context.Validate(band); err != nil {
+			return err
+		}
+		if band.LiveId != int(liveId) {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		err = s.bandService.Register(band.ToModel())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		return context.JSON(http.StatusOK, band)
+	})
+
+	s.e.PATCH("/live/:live_id/band/:turn", func(context echo.Context) error {
+		liveId, err := strconv.ParseInt(context.Param("live_id"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		turn, err := strconv.ParseInt(context.Param("turn"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		band := new(BandPatchRequest)
+		if err := context.Bind(band); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err := context.Validate(band); err != nil {
+			return err
+		}
+		err = s.bandService.Update(int(liveId), int(turn), band.ToModel())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.JSON(http.StatusOK, band)
+	})
+
+	s.e.DELETE("/live/:live_id/band/:turn", func(context echo.Context) error {
+		liveId, err := strconv.ParseInt(context.Param("live_id"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		turn, err := strconv.ParseInt(context.Param("turn"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		err = s.bandService.Delete(int(liveId), int(turn))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
