@@ -15,15 +15,15 @@ type LiveRepository interface {
 type BandRepository interface {
 	FindByLiveId(id int) ([]*Band, error)
 	Create(band *Band) error
-	UpdateTurn(id int, prevTurn int, afterTurn int) error
-	DeleteByIdAndTurn(id int, turn int) error
+	Update(id int, turn int, band *Band) error
+	Delete(id int, turn int) error
 }
 
 type BandMemberRepository interface {
 	FindByLiveIdAndTurn(id int, turn int) ([]*Player, error)
 	Create(bandMember *BandMember) error
 	Delete(bandMember *BandMember) error
-	UpdateTurn(id int, prevTurn int, afterTurn int) error
+	Update(bandMember *BandMember, id int, turn int) error
 }
 
 type PlayerRepository interface {

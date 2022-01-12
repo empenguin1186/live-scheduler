@@ -106,14 +106,14 @@ func (b *BandRepositoryImpl) Create(band *domain.Band) error {
 	return err
 }
 
-func (b *BandRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn int) error {
+func (b *BandRepositoryImpl) Update(id int, turn int, band *domain.Band) error {
 	_, err := b.db.Exec(
-		`UPDATE Band SET turn = ? WHERE live_id = ? AND turn = ?`,
-		afterTurn, id, prevTurn)
+		`UPDATE Band SET name = ?, live_id = ?, turn = ? WHERE live_id = ? AND turn = ?`,
+		band.Name, band.LiveId, band.Turn, id, turn)
 	return err
 }
 
-func (b *BandRepositoryImpl) DeleteByIdAndTurn(id int, turn int) error {
+func (b *BandRepositoryImpl) Delete(id int, turn int) error {
 	_, err := b.db.Exec(`DELETE FROM Band WHERE live_id = ? AND turn = ?`, id, turn)
 	return err
 }
@@ -148,20 +148,22 @@ func (b *BandMemberRepositoryImpl) FindByLiveIdAndTurn(id int, turn int) ([]*dom
 
 func (b *BandMemberRepositoryImpl) Create(bandMember *domain.BandMember) error {
 	_, err := b.db.Exec(
-		`INSERT INTO BandMember(live_id, turn, member_name, member_name) VALUES ( ?, ?, ?, ? )`,
+		`INSERT INTO BandMember(live_id, turn, member_name, member_part) VALUES ( ?, ?, ?, ? )`,
 		bandMember.LiveId, bandMember.Turn, bandMember.MemberName, string(bandMember.MemberPart))
 	return err
 }
 
 func (b *BandMemberRepositoryImpl) Delete(bandMember *domain.BandMember) error {
 	_, err := b.db.Exec(
-		`DELETE FROM BandMember WHERE live_id = ? AND turn = ? AND member_name = ? AND member_name = ?`,
+		`DELETE FROM BandMember WHERE live_id = ? AND turn = ? AND member_name = ? AND member_part = ?`,
 		bandMember.LiveId, bandMember.Turn, bandMember.MemberName, string(bandMember.MemberPart))
 	return err
 }
 
-func (b *BandMemberRepositoryImpl) UpdateTurn(id int, prevTurn int, afterTurn int) error {
-	_, err := b.db.Exec(`UPDATE BandMember SET turn = ? WHERE live_id = ? AND turn = ?`, afterTurn, id, prevTurn)
+func (b *BandMemberRepositoryImpl) Update(bandMember *domain.BandMember, id int, turn int) error {
+	_, err := b.db.Exec(
+		`UPDATE BandMember SET id = ?, turn = ?, member_name = ?, member_part = ? WHERE live_id = ? AND turn = ?`,
+		bandMember.LiveId, bandMember.Turn, bandMember.MemberName, string(bandMember.MemberPart), id, turn)
 	return err
 }
 
