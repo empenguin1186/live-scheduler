@@ -11,18 +11,25 @@ import (
 const LAYOUT = "2006-01-02"
 
 type LiveServer struct {
-	e               *echo.Echo
-	liveService     domain.LiveService
-	liveDescService domain.LiveDescService
-	bandService     domain.BandService
+	e                 *echo.Echo
+	liveService       domain.LiveService
+	liveDescService   domain.LiveDescService
+	bandService       domain.BandService
+	bandMemberService domain.BandMemberService
 }
 
-func NewLiveServer(e *echo.Echo, liveService domain.LiveService, liveDescService domain.LiveDescService, bandService domain.BandService) *LiveServer {
+func NewLiveServer(
+	e *echo.Echo,
+	liveService domain.LiveService,
+	liveDescService domain.LiveDescService,
+	bandService domain.BandService,
+	bandMemberService domain.BandMemberService) *LiveServer {
 	return &LiveServer{
-		e:               e,
-		liveService:     liveService,
-		liveDescService: liveDescService,
-		bandService:     bandService,
+		e:                 e,
+		liveService:       liveService,
+		liveDescService:   liveDescService,
+		bandService:       bandService,
+		bandMemberService: bandMemberService,
 	}
 }
 

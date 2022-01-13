@@ -27,8 +27,10 @@ func main() {
 	bandMemberRepository := infra.NewBandMemberRepositoryImpl(db)
 	liveDescService := domain.NewLiveDescServiceImpl(liveRepository, bandRepository, bandMemberRepository)
 	liveService := domain.NewLiveServiceImpl(liveRepository)
+	bandService := domain.NewBandServiceImpl(bandRepository)
+	bandMemberService := domain.NewBandMemberServiceImpl(bandMemberRepository)
 
 	e := echo.New()
-	server := presentation.NewLiveServer(e, liveService, liveDescService)
+	server := presentation.NewLiveServer(e, liveService, liveDescService, bandService, bandMemberService)
 	server.Start()
 }
