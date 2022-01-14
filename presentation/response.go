@@ -104,3 +104,10 @@ type MemberResponsePart struct {
 	Name string      `json:"name"`
 	Part domain.Part `json:"part"`
 }
+
+func NewPlayerResponse(player *domain.Player) *MemberResponsePart {
+	return &MemberResponsePart{
+		Name: player.Name,
+		Part: player.Part,
+	}
+}

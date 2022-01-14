@@ -25,6 +25,7 @@ func main() {
 	liveRepository := infra.NewLiveRepositoryImpl(db)
 	bandRepository := infra.NewBandRepositoryImpl(db)
 	bandMemberRepository := infra.NewBandMemberRepositoryImpl(db)
+
 	liveDescService := domain.NewLiveDescServiceImpl(liveRepository, bandRepository, bandMemberRepository)
 	liveService := domain.NewLiveServiceImpl(liveRepository)
 	bandService := domain.NewBandServiceImpl(bandRepository)

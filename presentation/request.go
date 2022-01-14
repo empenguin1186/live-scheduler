@@ -85,6 +85,18 @@ func (r BandPatchRequest) ToModel() *domain.Band {
 	}
 }
 
+type PlayerRequest struct {
+	Name string `json:"name" validate:"required"`
+	Part string `json:"part" validate:"required"`
+}
+
+func (p *PlayerRequest) ToModel() *domain.Player {
+	return &domain.Player{
+		Name: p.Name,
+		Part: domain.Part(p.Part),
+	}
+}
+
 type CustomValidator struct {
 	validator *validator.Validate
 }

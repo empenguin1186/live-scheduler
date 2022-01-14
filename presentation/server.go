@@ -16,6 +16,7 @@ type LiveServer struct {
 	liveDescService   domain.LiveDescService
 	bandService       domain.BandService
 	bandMemberService domain.BandMemberService
+	playerService     domain.PlayerService
 }
 
 func NewLiveServer(
@@ -23,13 +24,15 @@ func NewLiveServer(
 	liveService domain.LiveService,
 	liveDescService domain.LiveDescService,
 	bandService domain.BandService,
-	bandMemberService domain.BandMemberService) *LiveServer {
+	bandMemberService domain.BandMemberService,
+	playerService domain.PlayerService) *LiveServer {
 	return &LiveServer{
 		e:                 e,
 		liveService:       liveService,
 		liveDescService:   liveDescService,
 		bandService:       bandService,
 		bandMemberService: bandMemberService,
+		playerService:     playerService,
 	}
 }
 
@@ -191,6 +194,49 @@ func (s *LiveServer) Start() {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return context.NoContent(http.StatusOK)
+	})
+
+	s.e.GET("/member", func(context echo.Context) error {
+		part := domain.Part(context.QueryParam("part"))
+		players, err := s.playerService.GetByPart(&part)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		var response []*MemberResponsePart
+		for _, p := range players {
+			response = append(response, NewPlayerResponse(p))
+		}
+		return context.JSON(http.StatusOK, response)
+	})
+
+	s.e.POST("/member/create", func(context echo.Context) error {
+		player := new(PlayerRequest)
+		if err := context.Bind(player); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err := context.Validate(player); err != nil {
+			return err
+		}
+		err := s.playerService.Register(player.ToModel())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.JSON(http.StatusOK, player)
+	})
+
+	s.e.POST("/member/delete", func(context echo.Context) error {
+		player := new(PlayerRequest)
+		if err := context.Bind(player); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err := context.Validate(player); err != nil {
+			return err
+		}
+		err := s.playerService.Delete(player.ToModel())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return context.JSON(http.StatusOK, player)
 	})
 
 	s.e.Logger.Fatal(s.e.Start(":1323"))
